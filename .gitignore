@@ -7,3 +7,6 @@ build/
 *.fdb_latexmk
 *.synctex.gz
 package-lock.json.bak
+
+# Keep real TeX logs used as LogParser test fixtures
+!packages/compile-service/fixtures/logs/*.log

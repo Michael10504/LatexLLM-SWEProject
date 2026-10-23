@@ -1,0 +1,5 @@
+\documentclass{article}
+\begin{document}
+\immediate\write18{touch /tmp/pwned}
+If shell escape is disabled, /tmp/pwned must NOT exist after this compile.
+\end{document}
