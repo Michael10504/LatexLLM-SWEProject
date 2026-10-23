@@ -1,0 +1,23 @@
+﻿{
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "explicit" },
+  "editor.tabSize": 2,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "terminal.integrated.defaultProfile.windows": "PowerShell",
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/*.aux": true,
+    "**/*.fls": true,
+    "**/*.fdb_latexmk": true,
+    "**/*.synctex.gz": true
+  },
+  "latex-workshop.latex.autoBuild.run": "never",
+  "latex-workshop.latex.outDir": "%DIR%/build",
+  "jest.runMode": "on-demand",
+  "[latex]": { "editor.defaultFormatter": null, "editor.formatOnSave": false },
+  "[dockerfile]": { "editor.defaultFormatter": "ms-azuretools.vscode-docker" }
+}

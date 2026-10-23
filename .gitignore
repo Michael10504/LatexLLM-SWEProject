@@ -1,0 +1,9 @@
+node_modules/
+dist/
+build/
+*.log
+*.aux
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+package-lock.json.bak
