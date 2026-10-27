@@ -1,0 +1,32 @@
+{
+  "name": "latex-llm-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main/main.js",
+  "scripts": {
+    "build:tsc": "tsc",
+    "build:assets": "copyfiles -u 1 \"src/**/*.html\" \"src/**/*.css\" dist/",
+    "build": "npm run build:tsc && npm run build:assets",
+    "start": "npm run build && electron .",
+    "dev": "concurrently \"tsc -w\" \"npm run build:assets\" \"electron .\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Michael10504/LatexLLM-SWEProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Michael10504/LatexLLM-SWEProject/issues"
+  },
+  "homepage": "https://github.com/Michael10504/LatexLLM-SWEProject#readme",
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "copyfiles": "^2.4.1",
+    "concurrently": "^10.0.6",
+    "electron": "^45.0.0",
+    "typescript": "^7.0.2"
+  }
+}
