@@ -1,0 +1,69 @@
+[
+  {
+    "id": "outline-coherent-research-section",
+    "task_id": "outline",
+    "text": "A municipal office tested appointment reminders over six weeks at two service desks. Both desks sent a text message the day before each appointment, and staff recorded whether visitors attended. Attendance was 84% during the test, but the office had not retained attendance data from before the reminders were introduced. Staff also noted that some telephone numbers were outdated. The office wants a report section explaining how the pilot operated, what was observed, and why the evidence cannot establish that reminders improved attendance. The report should distinguish an operational finding about contact details from a causal claim about attendance.",
+    "review": [
+      "Create ONE organized section plan with grouped design, observations and interpretation/limitations.",
+      "Subsections must tell a writer what to explain/discuss, not copy each sentence.",
+      "Do not invent baseline attendance, randomization, satisfaction data or a measured causal effect."
+    ],
+    "checks": {
+      "outline": true,
+      "max_sections": 4,
+      "writing_directions": true,
+      "preserve": [
+        "84%"
+      ]
+    }
+  },
+  {
+    "id": "outline-context-with-contrasts",
+    "task_id": "outline",
+    "text": "A department compared reusable transport boxes with its existing disposable packaging on a single delivery route. Reusable boxes were returned after 17 of 20 deliveries. Three boxes were not returned during the observation period, and their eventual status is unknown. The trial recorded return behavior but did not measure washing costs, material lifetime or environmental impact. Staff suggested that return instructions might influence participation, although that suggestion was not tested. A section is needed that describes the trial and interprets the return observations without claiming overall sustainability benefits.",
+    "review": [
+      "Group trial design and return results, then distinguish missing economic/environmental evidence and untested explanations.",
+      "Make writing directions actionable and avoid a separate section for every sentence."
+    ],
+    "checks": {
+      "outline": true,
+      "max_sections": 4,
+      "writing_directions": true,
+      "preserve": [
+        "17",
+        "20"
+      ],
+      "forbid_regex": [
+        "(?i)\\blost\\b"
+      ]
+    }
+  },
+  {
+    "id": "outline-method-limitations",
+    "task_id": "outline",
+    "text": "The project estimates room occupancy from a doorway sensor rather than identifying individual visitors. The device increments a counter on entry and decrements it on exit. Simultaneous crossings can produce counting errors, and a manual reset is required after the room closes. Testing took place at one doorway during a quiet afternoon; peak-hour performance was not evaluated. No images or names were stored. The requested methods section should explain the counting approach, the operational reset requirement, the limited test conditions and the privacy-related data boundary.",
+    "review": [
+      "Synthesize related mechanism details; include reset, simultaneous-crossing limitation, test scope and no images/names.",
+      "Do not add facial recognition, a measured accuracy score or peak-hour evidence."
+    ],
+    "checks": {
+      "outline": true,
+      "max_sections": 4,
+      "writing_directions": true
+    }
+  },
+  {
+    "id": "outline-insufficient-context",
+    "task_id": "outline",
+    "text": "The project will examine whether adjustable desk height affects comfort during short study sessions. Recruitment, measurements and the comparison design have not yet been decided. The requested section should introduce this research aim and identify which design details remain unspecified; it must not present planned or invented methods as completed work.",
+    "review": [
+      "A compact plan is sufficient. Mark unspecified design details explicitly.",
+      "Do not invent sample size, random assignment, a questionnaire, duration or results."
+    ],
+    "checks": {
+      "outline": true,
+      "max_sections": 3,
+      "writing_directions": true
+    }
+  }
+]
