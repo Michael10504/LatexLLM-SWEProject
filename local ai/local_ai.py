@@ -10,8 +10,13 @@ import sys
 from prompts import PROMPTS, schema_for
 
 ROOT = Path(__file__).resolve().parent
-TASKS = {'notes': 'Extract and organize notes from context', 'outline': 'Write a section outline',
-         'clarity': 'Rewrite for clarity', 'tone': 'Adjust academic tone'}
+TASKS = {
+    'notes': 'Extract and organize notes from context',
+    'outline': 'Write a section outline',
+    'clarity': 'Rewrite for clarity',
+    'tone': 'Adjust academic tone',
+    'grammar': 'Check grammar'
+}
 STRONG_MODEL = 'Qwen3-4B-Q4_K_M.gguf'
 OUTLINE_MODEL = 'outline-q4_k_m.gguf'
 MENU = {str(i): task for i, task in enumerate(TASKS, 1)}
@@ -36,7 +41,7 @@ def offline():
 
 def validate(task, text):
     if task not in TASKS:
-        raise ValueError('Only tasks 1-4 are implemented in this release.')
+       raise ValueError('Only tasks 1-5 are implemented in this release.')
     if not isinstance(text, str) or not text.strip():
         raise ValueError('Please select text before running this task.')
     if len(text.split()) > 1000:
@@ -115,7 +120,7 @@ class Runner:
         if notes is not None:
             text = '\n'.join(n['text'] for n in notes)
         self.load(task)
-        masked, spans = protect(text) if task in ('clarity', 'tone') else (text, [])
+        masked, spans = protect(text) if task in ('clarity', 'tone', 'grammar') else (text, [])
         user = masked + '\n/no_think'
         # Explicit Qwen3 ChatML template; suppress hidden reasoning at generation start.
         system = PROMPTS[task]
@@ -173,15 +178,15 @@ def main():
     runner = Runner(a.context, a.max_tokens, a.gpu_layers)
     try:
         while True:
-            print('\nLocal AI - tasks 1-4')
+            print('\nLocal AI - tasks 1-5')
             for i, task in MENU.items():
                 label = 'fine-tuned Qwen3-1.7B' if task == 'outline' else 'shared Qwen3-4B'
                 print(f'{i}. {TASKS[task]} [{label}]')
-            choice = input('Choose option (1-4), or q to quit: ').strip()
+            choice = input('Choose option (1-5), or q to quit: ').strip()
             if choice.lower() == 'q':
                 break
             if choice not in MENU:
-                print('Choose 1, 2, 3, or 4.')
+                print('Choose 1, 2, 3, 4 or 5.')
                 continue
             task = MENU[choice]
             print('Paste selected text; finish with a line containing only .end')

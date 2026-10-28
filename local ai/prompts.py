@@ -9,6 +9,15 @@ COMMON = (
     'Do not add a preface, explanations, reasoning or Markdown fences. '
 )
 PROMPTS = {
+    'grammar': COMMON + (
+        'Correct grammar, spelling, punctuation, and subject-verb agreement. '
+        'Make only the minimal changes necessary. Do not rewrite for style, '
+        'change academic tone, summarize, or add new information. '
+        'Preserve meaning, technical terminology, numbers, units, negation, '
+        'uncertainty, and paragraph structure. '
+        'Keep grammatically correct text unchanged. '
+        'Preserve every PROTECTED token exactly once and without alteration. '
+        'Return only the corrected passage.'),
     'notes': COMMON + (
         'Extract useful study/research notes from the continuous context. Read across sentences '
         'and paragraphs to identify the topic, purpose, key concepts, method, findings, limitations '
