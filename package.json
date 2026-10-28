@@ -23,10 +23,17 @@
   },
   "homepage": "https://github.com/Michael10504/LatexLLM-SWEProject#readme",
   "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.6.5",
-    "copyfiles": "^2.4.1",
     "concurrently": "^10.0.6",
+    "copyfiles": "^2.4.1",
     "electron": "^45.0.0",
     "typescript": "^7.0.2"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true
   }
 }
