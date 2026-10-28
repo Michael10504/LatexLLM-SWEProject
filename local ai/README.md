@@ -1,3 +1,8 @@
+
+# Download the models from that link and put it the same directory
+
+https://drive.google.com/drive/folders/1gXWvok6Q9kjq92JbIqsOSTH7Bi7NIlLC?usp=sharing
+
 # Local academic AI
 
 Qwen3-4B Q4_K_M handles tasks 1, 3 and 4; your fine-tuned Qwen3-1.7B outline GGUF handles task 2:
