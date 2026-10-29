@@ -1,0 +1,20 @@
+{
+  "//": "IF-06 / FR-05.4: only NetworkGateway may open network connections. Merge into the client's ESLint config.",
+  "rules": {
+    "no-restricted-globals": ["error",
+      { "name": "fetch", "message": "Use NetworkGateway.send() — it is the single exit point (FR-05.4, FR-06.2)." },
+      { "name": "XMLHttpRequest", "message": "Use NetworkGateway.send()." },
+      { "name": "WebSocket", "message": "Use NetworkGateway.send()." }
+    ],
+    "no-restricted-imports": ["error", {
+      "paths": ["http", "https", "net", "tls", "dgram", "axios", "node-fetch", "undici"],
+      "patterns": ["node:http*", "node:net", "node:tls"]
+    }]
+  },
+  "overrides": [
+    {
+      "files": ["src/network/NetworkGateway.ts"],
+      "rules": { "no-restricted-globals": "off", "no-restricted-imports": "off" }
+    }
+  ]
+}
