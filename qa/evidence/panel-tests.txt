@@ -1,0 +1,20 @@
+✔ exactly eight tasks are available (0.7599ms)
+✔ empty selection does not call the engine (0.9888ms)
+✔ only supplied selection is forwarded and source input remains unchanged (0.248ms)
+✔ 1000 words accepted; 1001 rejected before calling engine (0.249ms)
+✔ Task 8 uses compile log instead of selection (0.1787ms)
+✔ missing compile log blocks Task 8 (0.1368ms)
+✔ streaming publishes running state and completed result (0.232ms)
+✔ cancel aborts request, clears partial output, ignores late chunks and result (0.1844ms)
+✔ duplicate run while busy is ignored (0.2468ms)
+✔ failed generation clears partial output (0.2362ms)
+✔ empty generation is a failure (0.208ms)
+✔ staging fields are read-only and there is no editor save/apply path (0.7023ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 12
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.1983
