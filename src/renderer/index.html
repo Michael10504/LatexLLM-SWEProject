@@ -5,8 +5,9 @@
     <meta charset="UTF-8">
     <title>LaTeX Local LLM Editor</title>
     <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:3443;">
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:3443; worker-src 'self';">
     <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./ws3.css">
 
 </head>
 
@@ -55,6 +56,8 @@
     </div>
 
     <script src="./renderer.js"></script>
+    <!-- WS-3 compile panel (bundled by scripts/build-ws3.mjs) -->
+    <script type="module" src="./ws3.js"></script>
 </body>
 
 </html>

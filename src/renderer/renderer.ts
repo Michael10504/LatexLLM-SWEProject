@@ -115,6 +115,8 @@ authSubmitBtn?.addEventListener('click', async () => {
     userStatus.innerText = `User: ${currentUser.username}`;
     logoutBtn.style.display = 'inline-block';
     passwordInput.value = '';
+    // Lets other panels (WS-3 compile panel) know who is logged in.
+    window.dispatchEvent(new CustomEvent('app:login', { detail: { username: currentUser.username } }));
 });
 
 // Logout Handler with UC-03 Unsaved Changes Check
@@ -133,6 +135,7 @@ logoutBtn?.addEventListener('click', async () => {
     userStatus.innerText = 'User: Not Logged In';
     logoutBtn.style.display = 'none';
     authOverlay.style.display = 'flex';
+    window.dispatchEvent(new CustomEvent('app:logout'));
 });
 
 // Existing IPC Test
