@@ -9,8 +9,8 @@ import { logger } from './config/logger';
 dotenv.config();
 
 const PORT = process.env.PORT || 3443;
-const keyPath = path.join(__dirname, '../certs/server.key');
-const certPath = path.join(__dirname, '../certs/server.cert');
+const keyPath = path.join(__dirname, '../../certs/server.key');
+const certPath = path.join(__dirname, '../../certs/server.cert');
 
 let server: https.Server | http.Server;
 

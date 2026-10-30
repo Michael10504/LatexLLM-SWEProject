@@ -1,7 +1,7 @@
-node_modules/
-dist/
-prisma/*.db
-prisma/*.db-journal
-.env
-certs/
-*.log
+server/node_modules/
+server/dist/
+server/prisma/*.db
+server/prisma/*.db-journal
+server/.env
+server/certs/
+server/*.log
