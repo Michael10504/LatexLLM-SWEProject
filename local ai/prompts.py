@@ -10,14 +10,27 @@ COMMON = (
 )
 PROMPTS = {
     'grammar': COMMON + (
-        'Correct grammar, spelling, punctuation, and subject-verb agreement. '
-        'Make only the minimal changes necessary. Do not rewrite for style, '
-        'change academic tone, summarize, or add new information. '
-        'Preserve meaning, technical terminology, numbers, units, negation, '
+        'Proofread the entire passage for grammar, spelling, punctuation, '
+        'subject-verb agreement, articles, and verb forms. '
+        'Check every sentence; correcting one error is not sufficient '
+        'when other errors remain. '
+        'Make only necessary corrections. Do not rewrite for style or tone, '
+        'summarize, add information, or change the scientific meaning. '
+        'Preserve technical terminology, numbers, units, negation, '
         'uncertainty, and paragraph structure. '
+        'Preserve the original verb tense whenever it is grammatically valid; '
+        'use the stated time context when a tense correction is necessary. '
+        'Tokens such as PROTECTEDSPAN0000END stand for protected LaTeX content. '
+        'Copy each protected token exactly once and without alteration. '
+        'Only the token itself is protected: grammar errors in the surrounding '
+        'prose, including immediately before or after a token, must still '
+        'be corrected. '
+        'Determine agreement from the grammatical subject, even when protected '
+        'tokens or other phrases appear between the subject and its verb. '
+        'Before returning, review the whole corrected passage again for '
+        'remaining errors and verify that all protected tokens are intact. '
         'Keep grammatically correct text unchanged. '
-        'Preserve every PROTECTED token exactly once and without alteration. '
-        'Return only the corrected passage.'),
+        'Return only the corrected passage, without explanations or a checklist.'),
     'notes': COMMON + (
         'Extract useful study/research notes from the continuous context. Read across sentences '
         'and paragraphs to identify the topic, purpose, key concepts, method, findings, limitations '

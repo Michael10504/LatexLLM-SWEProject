@@ -1,4 +1,4 @@
-"""Offline terminal inference for the first four academic editing tasks."""
+"""Offline terminal inference for the first five academic editing tasks."""
 import argparse
 import gc
 import json
@@ -41,7 +41,7 @@ def offline():
 
 def validate(task, text):
     if task not in TASKS:
-       raise ValueError('Only tasks 1-5 are implemented in this release.')
+        raise ValueError('Only tasks 1-5 are implemented in this release.')
     if not isinstance(text, str) or not text.strip():
         raise ValueError('Please select text before running this task.')
     if len(text.split()) > 1000:
@@ -58,6 +58,87 @@ def protect(text):
         spans.append(match.group())
         return token
     return PROTECTED.sub(replace, text), spans
+
+
+def grammar_parts(text):
+    """Conservative English boundaries; preserve separators and protected LaTeX.
+
+    This is a heuristic, not a general multilingual sentence parser. Known
+    abbreviations, initials, decimals and protected spans remain together.
+    """
+    masked, spans = protect(text)
+    parts = []
+    start = 0
+    abbreviations = {'dr', 'mr', 'mrs', 'ms', 'prof', 'fig', 'figs',
+                     'eq', 'eqs', 'sec', 'secs', 'ref', 'refs', 'no',
+                     'vol', 'vs', 'etc', 'al', 'e.g', 'i.e'}
+    for match in re.finditer(r'(?<=[.!?])(?:[ \t]+|[ \t]*\r?\n(?:[ \t]*\r?\n)*[ \t]*)', masked):
+        before = masked[start:match.start()]
+        if before.endswith('.'):
+            word = re.search(r'([A-Za-z.]+)\.$', before)
+            if word and (word.group(1).lower() in abbreviations
+                         or re.fullmatch(r'(?:[A-Za-z]\.)*[A-Za-z]', word.group(1))):
+                continue
+            # A numbered list marker is not a sentence.
+            if re.fullmatch(r'\s*\d+\.', before):
+                continue
+        parts.extend((masked[start:match.start()], match.group()))
+        start = match.end()
+    parts.append(masked[start:])
+    restored = []
+    for part in parts:
+        restored.append(re.sub(r'PROTECTEDSPAN(\d{4,})END',
+                               lambda m: spans[int(m.group(1))], part))
+    return restored
+
+
+class GrammarPreview:
+    """Restore protection tokens even when split across model chunks.
+
+    Preview remains provisional; callers must discard it if run() raises.
+    """
+    def __init__(self, text, emit):
+        _, self.spans = protect(text)
+        self.emit = emit
+        self.pending = ''
+
+    def feed(self, part):
+        self.pending += part
+        marker = 'PROTECTEDSPAN'
+        while self.pending:
+            if self.pending.startswith(marker):
+                match = re.match(r'PROTECTEDSPAN(\d{4,})END', self.pending)
+                if not match:
+                    return
+                index = int(match.group(1))
+                if index >= len(self.spans):
+                    raise ValueError('Model invented protected LaTeX; result discarded.')
+                self.emit(self.spans[index])
+                self.pending = self.pending[match.end():]
+            else:
+                # Hold any suffix that might begin a token in the next chunk.
+                offset = self.pending.find(marker)
+                if offset >= 0:
+                    self.emit(self.pending[:offset])
+                    self.pending = self.pending[offset:]
+                    continue
+                hold = 0
+                for size in range(1, min(len(marker), len(self.pending)) + 1):
+                    if self.pending.endswith(marker[:size]):
+                        hold = size
+                ready = self.pending[:-hold] if hold else self.pending
+                if ready:
+                    self.emit(ready)
+                self.pending = self.pending[-hold:] if hold else ''
+                return
+
+    def finish(self):
+        if self.pending:
+            if self.pending.startswith('PROTECTEDSPAN'):
+                raise ValueError('Model changed protected LaTeX; result discarded.')
+            self.emit(self.pending)
+            self.pending = ''
+
 
 class Runner:
     def __init__(self, context=4096, max_tokens=1024, gpu_layers=None):
@@ -110,6 +191,31 @@ class Runner:
         print(f'Loaded {path.name}: {layers} GPU layers requested; remaining layers on CPU.', file=sys.stderr)
 
     def run(self, task, text, emit=lambda chunk: None, notes=None):
+        if task != 'grammar' or notes is not None:
+            return self._run_single(task, text, emit, notes)
+        # Enforce the selection limit before loading or splitting the input.
+        validate(task, text)
+        parts = grammar_parts(text)
+        results = []
+        for index, part in enumerate(parts):
+            if index % 2 or not part.strip():
+                results.append(part)
+                emit(part)
+                continue
+            leading = part[:len(part) - len(part.lstrip())]
+            trailing = part[len(part.rstrip()):]
+            source = part.strip()
+            if leading:
+                emit(leading)
+            preview = GrammarPreview(source, emit)
+            result = self._run_single(task, source, preview.feed)
+            preview.finish()
+            if trailing:
+                emit(trailing)
+            results.append(leading + result.strip() + trailing)
+        return ''.join(results)
+
+    def _run_single(self, task, text, emit=lambda chunk: None, notes=None):
         validate(task, text)
         if notes is not None:
             if task != 'notes' or not isinstance(notes, list) or not notes or any(
@@ -128,6 +234,33 @@ class Runner:
         if task == 'tone':
             demonstration = ('<|im_start|>user\nI tested the method on 20 samples, but I am not sure it works in other settings.<|im_end|>\n'
                              '<|im_start|>assistant\nThe method was tested on 20 samples, but its performance in other settings remains uncertain.<|im_end|>\n')
+        elif task == 'grammar':
+            demonstration = (
+                '<|im_start|>user\n'
+                'The coefficient PROTECTEDSPAN0000END control the response. '
+                'Its units is specified in PROTECTEDSPAN0001END.'
+                '<|im_end|>\n'
+                '<|im_start|>assistant\n'
+                'The coefficient PROTECTEDSPAN0000END controls the response. '
+                'Its units are specified in PROTECTEDSPAN0001END.'
+                '<|im_end|>\n'
+                '<|im_start|>user\n'
+                'Both operators was present. The instrument did not detects '
+                'a change, and the readings remains uncertain.'
+                '<|im_end|>\n'
+                '<|im_start|>assistant\n'
+                'Both operators were present. The instrument did not detect '
+                'a change, and the readings remain uncertain.'
+                '<|im_end|>\n'
+                '<|im_start|>user\n'
+                'The device have a display. Its purpose are described '
+                'in PROTECTEDSPAN0000END.'
+                '<|im_end|>\n'
+                '<|im_start|>assistant\n'
+                'The device has a display. Its purpose is described '
+                'in PROTECTEDSPAN0000END.'
+                '<|im_end|>\n'
+            )
         prompt = f'<|im_start|>system\n{system}<|im_end|>\n{demonstration}<|im_start|>user\n{user}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
         if len(self.model.tokenize(prompt.encode('utf-8'))) + self.max_tokens > self.context:
             raise ValueError('Selection exceeds model token capacity. Please select a smaller selection.')

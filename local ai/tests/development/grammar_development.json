@@ -1,0 +1,103 @@
+[
+  {
+    "id": "grammar-dev-singular-math",
+    "task_id": "grammar",
+    "text": "The expression $v=d/t$ describe the average speed. Its meaning are explained in \\ref{sec:speed}.",
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "$v=d/t$",
+        "\\ref{sec:speed}"
+      ],
+      "forbid_regex": [
+        "\\bdescribe the average\\b",
+        "\\bmeaning are\\b"
+      ]
+    },
+    "review": [
+      "Use describes and is explained; correct both sentences, including prose beside protected spans.",
+      "Do not alter the mathematical expression or reference."
+    ],
+    "reference": "The expression $v=d/t$ describes the average speed. Its meaning is explained in \\ref{sec:speed}."
+  },
+  {
+    "id": "grammar-dev-plural-citation",
+    "task_id": "grammar",
+    "text": "These measurements in \\cite{lee2023} indicates a possible association. Two technicians was present, but the observations does not establish causality.",
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "\\cite{lee2023}",
+        "Two",
+        "possible",
+        "not establish causality"
+      ],
+      "forbid_regex": [
+        "\\bmeasurements.*?indicates\\b",
+        "\\btechnicians was\\b",
+        "\\bobservations does\\b"
+      ]
+    },
+    "review": [
+      "Correct indicates to indicate, was to were, and observations does to observations do.",
+      "Preserve the possible association and refusal to claim causality."
+    ]
+  },
+  {
+    "id": "grammar-dev-past-tense",
+    "task_id": "grammar",
+    "text": "Yesterday, the analyst review 16 records and record the missing values. The results was incomplete, and the analysis did not proves that the treatment worked.",
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "Yesterday",
+        "16",
+        "did not"
+      ],
+      "forbid_regex": [
+        "\\banalyst review\\b",
+        "\\band record the\\b",
+        "\\bresults was\\b",
+        "\\bdid not proves\\b"
+      ]
+    },
+    "review": [
+      "Use reviewed and recorded to match Yesterday; use were and did not prove.",
+      "Preserve incompleteness and the negative evidential claim."
+    ]
+  },
+  {
+    "id": "grammar-dev-spelling-and-agreement",
+    "task_id": "grammar",
+    "text": "The report contain 7 measurments. Each sensor have a separate identifier.",
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "7",
+        "separate identifier"
+      ],
+      "forbid_regex": [
+        "\\breport contain\\b",
+        "\\bmeasurments\\b",
+        "\\bsensor have\\b"
+      ]
+    },
+    "review": [
+      "Correct contains, measurements and has, without rewriting the meaning."
+    ],
+    "reference": "The report contains 7 measurements. Each sensor has a separate identifier."
+  },
+  {
+    "id": "grammar-dev-correct-prose",
+    "task_id": "grammar",
+    "text": "The sensors were calibrated yesterday. The relationship $P=IV$ is described in \\cite{rao2021}, but no causal conclusion is supported.",
+    "checks": {
+      "preserve": [
+        "The sensors were calibrated yesterday. The relationship $P=IV$ is described in \\cite{rao2021}, but no causal conclusion is supported."
+      ]
+    },
+    "review": [
+      "Return the already correct passage unchanged, including tense, equation and citation."
+    ]
+  }
+]
