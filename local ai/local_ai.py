@@ -1,4 +1,4 @@
-"""Offline terminal inference for the first four academic editing tasks."""
+"""Offline terminal inference for five academic editing tasks with automatic offloading."""
 import argparse
 import gc
 import json
@@ -7,7 +7,8 @@ from pathlib import Path
 import re
 import socket
 import sys
-from prompts import PROMPTS, schema_for
+import time
+from runtime.prompts import PROMPTS, schema_for
 
 ROOT = Path(__file__).resolve().parent
 TASKS = {
@@ -61,11 +62,15 @@ def protect(text):
 
 class Runner:
     def __init__(self, context=4096, max_tokens=1024, gpu_layers=None):
+        if not 1 <= context <= 4096 or not 1 <= max_tokens < context:
+            raise ValueError('Context must be <=4096 and output tokens must fit inside it.')
         self.context, self.max_tokens, self.gpu_layers = context, max_tokens, gpu_layers
         self.loaded_key = None
         self.actual_gpu_layers = 0
         self.model = None
         self.task = None
+        self.offload_plan = None
+        self._memory_checked = 0
 
     def close(self):
         if self.model is not None:
@@ -75,37 +80,70 @@ class Runner:
         self.task = None
         self.loaded_key = None
         self.actual_gpu_layers = 0
+        self.offload_plan = None
         gc.collect()
+
+    def _gpu_memory_ok(self):
+        if not self.actual_gpu_layers or self.offload_plan is None:
+            return True
+        from runtime.vram_policy import gpu_memory, CAP_MIB, RESERVE_MIB
+        memory = gpu_memory(self.offload_plan.uuid)
+        return (memory is not None and memory['free_mib'] >= RESERVE_MIB
+                and memory['used_mib']-self.offload_plan.baseline_used_mib <= CAP_MIB)
 
     def load(self, task):
         path = ROOT / model_for(task)
-        if task == 'outline' and self.gpu_layers == 0:
-            raise RuntimeError('Outline requires GPU offloading. Use a nonzero --gpu-layers value.')
         if self.model is not None and self.loaded_key == str(path):
-            if task == 'outline' and self.actual_gpu_layers == 0:
-                raise RuntimeError('Outline requires GPU offloading. Restart with nonzero --gpu-layers and a GPU backend.')
-            self.task = task
-            return
+            if self._gpu_memory_ok():
+                self.task = task
+                return
+            self.close()
         self.close()
         if not path.is_file():
             hint = 'Restore your outline GGUF.' if task == 'outline' else 'Run download_strong_model.py during setup.'
             raise FileNotFoundError(f'Model unavailable: {path}. {hint}')
+        settings = {}
         settings_path = ROOT / 'gpu_settings.json'
         if settings_path.is_file():
             settings = json.loads(settings_path.read_text(encoding='utf-8'))
             if 'vulkan_visible_devices' in settings:
                 os.environ.setdefault('GGML_VK_VISIBLE_DEVICES', str(settings['vulkan_visible_devices']))
         from llama_cpp import Llama, llama_supports_gpu_offload
-        layers = 12 if self.gpu_layers is None else self.gpu_layers
+        print('Loading local model; preparing CPU/GPU execution...', file=sys.stderr, flush=True)
         supported = llama_supports_gpu_offload()
-        if task == 'outline' and (layers == 0 or not supported):
-            raise RuntimeError('Outline requires GPU offloading. Use a Vulkan/CUDA backend and nonzero --gpu-layers.')
-        if layers and not supported:
-            print('GPU backend unavailable; using CPU. Install a Vulkan or CUDA wheel for offloading.', file=sys.stderr)
+        from runtime.vram_policy import choose_offload
+        plan = choose_offload(path, self.gpu_layers, settings, supported)
+        layers = plan.gpu_layers
+        print(f'VRAM plan: {layers}/{plan.total_layers} GPU layers; '
+              f'free VRAM {plan.free_vram_mib}/{plan.total_vram_mib} MiB; '
+              f'estimated {plan.estimated_mib} MiB / available budget {plan.available_budget_mib} MiB. '
+              f'{plan.reason}.', file=sys.stderr)
+        try:
+            self.model = Llama(model_path=str(path), n_ctx=self.context, n_batch=128,
+                               n_gpu_layers=layers, offload_kqv=False, op_offload=bool(layers), verbose=False)
+        except Exception:
+            if not layers:
+                raise
+            gc.collect()
+            print('GPU load failed; retrying entirely on CPU.', file=sys.stderr)
             layers = 0
-        self.model = Llama(model_path=str(path), n_ctx=self.context, n_batch=128,
-                           n_gpu_layers=layers, offload_kqv=False, verbose=False)
+            plan.gpu_layers = 0
+            plan.estimated_mib = 0
+            plan.reason = 'GPU load failed; CPU fallback'
+            self.model = Llama(model_path=str(path), n_ctx=self.context, n_batch=128,
+                               n_gpu_layers=0, offload_kqv=False, op_offload=False, verbose=False)
         self.actual_gpu_layers = layers
+        self.offload_plan = plan
+        if not self._gpu_memory_ok():
+            self.close()
+            print('GPU memory changed or exceeded budget during loading; using CPU.', file=sys.stderr)
+            self.model = Llama(model_path=str(path), n_ctx=self.context, n_batch=128,
+                               n_gpu_layers=0, offload_kqv=False, op_offload=False, verbose=False)
+            layers = 0
+            plan.gpu_layers = 0
+            plan.estimated_mib = 0
+            plan.reason = 'Memory changed during loading; CPU fallback'
+            self.offload_plan = plan
         self.task, self.loaded_key = task, str(path)
         print(f'Loaded {path.name}: {layers} GPU layers requested; remaining layers on CPU.', file=sys.stderr)
 
@@ -117,6 +155,8 @@ class Runner:
             ):
                 raise ValueError('Notes must contain nonempty text strings for task 1.')
             validate(task, '\n'.join(n['text'] for n in notes))
+            if '\n'.join(n['text'] for n in notes) != text:
+                raise ValueError('Notes must match the selected text; only the current selection is allowed.')
         if notes is not None:
             text = '\n'.join(n['text'] for n in notes)
         self.load(task)
@@ -128,6 +168,9 @@ class Runner:
         if task == 'tone':
             demonstration = ('<|im_start|>user\nI tested the method on 20 samples, but I am not sure it works in other settings.<|im_end|>\n'
                              '<|im_start|>assistant\nThe method was tested on 20 samples, but its performance in other settings remains uncertain.<|im_end|>\n')
+        elif task == 'notes':
+            demonstration = ('<|im_start|>user\nA campus pilot included 8 participants. Findings were preliminary; causality was not established.<|im_end|>\n'
+                             '<|im_start|>assistant\n{"groups":[{"heading":"Campus pilot","notes":["The campus pilot included 8 participants.","Findings were preliminary; causality was not established."]}]}<|im_end|>\n')
         prompt = f'<|im_start|>system\n{system}<|im_end|>\n{demonstration}<|im_start|>user\n{user}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n'
         if len(self.model.tokenize(prompt.encode('utf-8'))) + self.max_tokens > self.context:
             raise ValueError('Selection exceeds model token capacity. Please select a smaller selection.')
@@ -138,6 +181,10 @@ class Runner:
         output = ''
         for chunk in self.model(prompt, max_tokens=self.max_tokens, temperature=0,
                                 stream=True, stop=['<|im_end|>', '<|im_start|>'], **options):
+            if self.actual_gpu_layers and time.monotonic()-self._memory_checked >= 2:
+                self._memory_checked = time.monotonic()
+                if not self._gpu_memory_ok():
+                    raise RuntimeError('GPU memory unavailable or budget exceeded; partial result discarded. Retry on CPU.')
             choice = chunk['choices'][0]
             if choice.get('finish_reason') == 'length':
                 raise ValueError('Output token limit reached; result discarded. Use a smaller selection.')
@@ -172,7 +219,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('--context', type=int, default=4096)
     p.add_argument('--max-tokens', type=int, default=1024)
-    p.add_argument('--gpu-layers', type=int, default=None, help='GPU offload layers (default: 12); outline requires nonzero offloading')
+    p.add_argument('--gpu-layers', type=int, default=None,
+                   help='Default: auto-fit free VRAM under 1.5 GB. 0: CPU; -1: full if it fits; N: maximum GPU layers.')
     a = p.parse_args()
     offline()
     runner = Runner(a.context, a.max_tokens, a.gpu_layers)

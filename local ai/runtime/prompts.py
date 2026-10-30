@@ -26,6 +26,9 @@ PROMPTS = {
         'notes grouped by theme. Do not merely split every sentence into a note, repeat the '
         'passage, or create a group for every sentence. Remove redundancy without dropping '
         'important qualifications. Distinguish observations from interpretations and proposals. '
+        'Retain preliminary status, uncertainty and unestablished causality whenever the source '
+        'states them. These qualifications are mandatory evidence, even in a very short passage; '
+        'do not return only the participant count and omit the limitations. '
         'If evidence is insufficient, state the limitation rather than filling gaps. '
         'Return ONLY JSON: {"groups":[{"heading":"short topic","notes":["concise grounded note"]}]}. '
         'Use 1-4 groups as appropriate; short context needs fewer notes.'),

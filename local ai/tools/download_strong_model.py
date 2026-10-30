@@ -6,7 +6,7 @@ from pathlib import Path
 import time
 import urllib.request
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 REPO = 'Qwen/Qwen3-4B-GGUF'
 NAME = 'Qwen3-4B-Q4_K_M.gguf'
 

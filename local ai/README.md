@@ -1,83 +1,124 @@
+# Sprint 1 local AI
 
-# Download the models from that link and put it the same directory
+## Files to use
 
-https://drive.google.com/drive/folders/1gXWvok6Q9kjq92JbIqsOSTH7Bi7NIlLC?usp=sharing
+- `local_ai.py`: run the program.
+- `test_requirements.py`: the requirements acceptance suite.
+- `test.py`: run JSON/JSONL case files using the current runtime.
+- `test_cases/`: working copies of the six archived JSON case files (32 cases).
+- `test_responses.txt`: saved responses and checks from `test.py`.
+- `requirements_report.txt`: the single active results report, revised requirements,
+  input/output for every quality case, timings, old GPU sweep evidence and source code.
+- `runtime/`: prompt templates, VRAM planning and optional service adapters.
+- `tools/download_strong_model.py`: online setup helper, not part of inference.
+- `_archive/`: preserved earlier scripts, case files and diagnostic reports.
 
-# Local academic AI
-
-Qwen3-4B Q4_K_M handles tasks 1, 3 and 4; your fine-tuned Qwen3-1.7B outline GGUF handles task 2:
-
-1. Extract and organize notes from continuous context.
-2. Write one coherent academic section outline with actionable writing directions.
-3. Rewrite for clarity.
-4. Adjust academic tone using impersonal wording.
+Model GGUFs remain alongside local_ai.py. Do not commit the binaries.
 
 ## Run
-
-From this folder:
 
 ```powershell
 python local_ai.py
 ```
 
-Choose 1-4, paste context or selected text, then enter `.end` on a new line. Task 1 reads paragraphs, infers appropriate themes and synthesizes notes from supplied evidence. It no longer clusters prewritten sentences with MiniLM. Task 2 synthesizes related ideas into meaningful headings and instructions about what to write; it does not create one section per sentence.
+Choose 1–5; paste selected text; finish with `.end` on its own line.
+The five tasks are notes, outline, clarity, academic tone and grammar.
+Tasks 6–8 are deferred to Sprint 2. FR-03.6 was removed from the acceptance list;
+existing streaming preview and Ctrl+C remain available.
+The program proposes output and never writes into a source document.
 
-`prompts.py` contains the internal instructions. These distinguish findings from interpretation, preserve uncertainty/negation, avoid invented evidence, and request concise structured outputs for tasks 1-2. Clarity and tone preserve protected citations, references and math. Tone avoids first-person authorial language, hype and unsupported claims. Source quotations are preserved. A final check rejects first-person tone results outside quotes/protected spans.
-
-Tasks 1, 3 and 4 share Qwen3-4B. Task 2 loads outline-q4_k_m.gguf. Switching between those models closes the previous model before loading the next; switching among 1, 3 and 4 reuses the loaded 4B model. Outline still requires GPU offloading and uses 12 GPU layers by default. MiniLM and the old clarity/tone specialists are not used.
-
-## GPU and cancellation
-
-Default: 12 model layers on GPU, remaining layers and KV cache on CPU. This laptop uses a Vulkan backend; `gpu_settings.json` selects NVIDIA device 1 rather than Intel device 0. That machine-specific file is ignored by Git. Copy/edit `gpu_settings.example.json` when setting up another computer, or omit it to use backend defaults.
+## Run JSON case files
 
 ```powershell
-python local_ai.py --gpu-layers 8
-nvidia-smi -l 1
+python test.py                          # all 32 cases; writes test_responses.txt
+python test.py test_cases/06_grammar.json
+python test.py --validate-only          # no model loading
+python test.py --case-id grammar-already-correct
+python test.py --report my_responses.txt
 ```
 
-Outline requires nonzero GPU offloading and fails clearly if it is unavailable, including when a CPU-only instance was already cached. Other options announce CPU fallback when necessary. Partial offloading does not guarantee the guide's 3 GB GPU ceiling for every input; measure representative workloads. Context defaults to 4096 tokens and output to 1024 (`--context`, `--max-tokens`).
+The source code and working JSON files are outside `_archive/`. Archived originals
+are preserved as history. You can also pass an archived JSON file or folder explicitly.
+Responses are saved after each case, including source text, complete output, timings,
+GPU layers, checks and errors. Boundary/validation-only cases do not invoke the model.
+Ctrl+C retains completed responses and discards the current partial response.
+Each invocation replaces its selected response report. The separate
+`requirements_report.txt` is not modified by this runner.
 
-Empty selections and selections over 1,000 whitespace-separated words are rejected before loading. Token capacity can impose a smaller limit. Output streams as an uncommitted preview. Ctrl+C cancels and discards the result; the program never edits a document. Terminal scrollback may retain previously displayed preview text. Invalid/truncated structured output or altered protected spans cause rejection.
-
-## Tests
+## Requirements suite
 
 ```powershell
-python test_run.py
-python test_run.py tests/cases/01_notes.json --report reports/notes.txt
-python test_run.py --validate-only --report reports/input_validation.txt
-python -m unittest discover -s . -p test_runtime.py
+python test_requirements.py          # 45 unit/component checks, refresh report
+python test_requirements.py --all    # plus 20 warm performance runs, 30 prompts/task and CPU checks
+python test_requirements.py --report-only
 ```
 
-All 24 authored cases in `tests/cases/` run by default, using the same model routing as the menu (outline specialist for task 2, 4B for the others). Results and benchmarks are saved to `reports/test_report.txt`. Use `--limit N` to limit records per file, or supply JSON/JSONL files/folders. Report files include source, output, timings, explicit checks, and manual semantic review criteria. See `tests/README.md`.
+The real test set contains 150 short synthetic development prompts: 30 per task.
+The script saves after each completed case and resumes unfinished cases on rerun.
+It preserves failures in the denominator. Automatic preservation/structure checks
+are supplementary to the semantic reviewer ratings in revised NFR-07. The adopted
+Sprint 1 wording permits one explicitly labelled AI-assisted preliminary review;
+this is not the original two-independent-human-reviewer acceptance. Human review
+slots remain available for stronger independent assessment.
+After the full run, two independent people can record ratings in the SAME report:
 
-These synthetic evaluation cases are separate from earlier training and smoke-test data. They cover longer contexts, mixed findings, procedural dependencies, insufficient evidence, connected arguments, numeric/LaTeX preservation and input limits. They are not professionally validated benchmark data. Do not train on them if using them for held-out evaluation.
+```powershell
+python test_requirements.py --reviewer "Reviewer One"
+python test_requirements.py --reviewer "Reviewer Two"
+```
 
-`ok` means generation and explicit checks succeeded, not that semantic review passed. `quality_failed` identifies a failed acceptance check; inspect the result. Equivalent prose answers are allowed. Illustrative references are guidance, not exact-match targets. The suite includes five rejected-input cases and one validation-only 1,000-word case. Runtime contracts use mocks and require no model dependencies.
+Each reviewer sees the source and model output, records meaning preservation and
+a corrected version. The script computes word edits and checks the 10% boundary.
+Ratings persist across report regeneration. Do not record ratings during an active
+test run. Reviewer names must identify two different people, not two automated runs.
+
+Runtime checks do not establish acceptance for an editor absent from this project.
+FR-03.4 allows local in-process execution; it does not mandate an HTTP server.
+Inference uses local GGUFs with Python network sockets blocked. This is runtime
+code/path evidence, not an OS-level network sandbox for arbitrary native plugins.
+
+## Automatic offloading
+
+The default reads GGUF tensor sizes and live NVIDIA free VRAM. It chooses the
+largest estimated layer count under both a 1.5 GB decimal AI budget (1430 MiB)
+and free VRAM minus 256 MiB headroom. Estimates include GPU overhead; KV cache
+and remaining layers stay on CPU. GPU initialization failure retries on CPU.
+CPU fallback requires sufficient system RAM; it has no GPU speed guarantee.
+
+```powershell
+python local_ai.py --gpu-layers 0    # CPU-only, including operation offloading disabled
+python local_ai.py --gpu-layers 8    # at most 8 GPU layers, reduced if needed
+python local_ai.py --gpu-layers -1   # full GPU if it fits; otherwise partial or CPU
+```
+
+The loaded model is reused while memory checks remain valid. Unknown telemetry,
+unknown model layout, insufficient memory or an unsupported GPU backend uses CPU.
+Current telemetry supports NVIDIA via nvidia-smi. For multiple NVIDIA cards configure
+nvidia_uuid and select the SAME physical backend device. The ignored
+`gpu_settings.json` selects Vulkan device 1 on this laptop; the example is not a
+universal device mapping.
+
+The 2 GB GPU is the target RC capacity; the actual test laptop has a 4 GB GTX 1650.
+The 1.5 GB AI budget still applies here. Memory estimates and sampled device deltas
+are not a driver-enforced quota and can be affected by other GPU applications.
+Maximum layer count also does not necessarily mean maximum speed.
+
+NFR-04 now uses automatic GPU/CPU execution: warm first-token p95 <=15 seconds,
+median output generation >=2 tokens/sec, exact 150-word rewrite p95 <=60 seconds,
+and cold first token <=30 seconds with loading status. The script performs one
+cold/warmup run and 20 measured warm rewrites. It records actual backend token
+counts and both wall-stream and native decode rates. Full GPU offload is no longer
+a prerequisite; the 1.5 GB budget still applies. Results concern the actual 4 GB
+GTX 1650 test laptop, not a physically tested 2 GB GPU.
 
 ## Setup after cloning
-
-Python 3.11 and a compatible GPU driver are recommended. Dependency and model downloads require internet; inference itself stays local.
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
-.\.venv\Scripts\python.exe download_strong_model.py
-.\.venv\Scripts\python.exe local_ai.py
+.\.venv\Scripts\python.exe tools/download_strong_model.py
 ```
 
-Requirements select the official prebuilt Vulkan wheel to avoid CMake compilation. Confirm support in the same Python environment:
-
-```powershell
-python -c "import llama_cpp; print(llama_cpp.llama_supports_gpu_offload())"
-```
-
-`download_strong_model.py` downloads official weights from https://huggingface.co/Qwen/Qwen3-4B-GGUF , resumes interrupted chunks, verifies the publisher's SHA256, and records provenance in `strong_model_manifest.json`. It is a separate online setup tool and sends no editing input. The application and test runner enable offline flags and block Python socket connections before importing model libraries. No API/server is used. Interactive text is not logged; test runs explicitly save local reports.
-
-## What to push
-
-Push the Python sources, requirements, README, tests, `.gitignore`, model manifest, and example GPU setting. The 2.5 GB GGUF stays on this machine and is ignored by Git, as are reports, caches, virtual environments and actual GPU settings. New clones download the model with the setup command. No model binary is needed in the repository. After cloning, also supply your trained outline-q4_k_m.gguf locally; the downloader retrieves only the public 4B model.
-
-Unused prior models, training datasets, notebooks, installers and old reports were moved outside this folder to `../local_ai_legacy_archive/` for recovery. That archive is excluded by the workspace `.gitignore`; do not add it to your repository.
-
-Scope: the first four tasks only. Tasks 5-8, compile-log handling, and editor selection/apply/undo integration remain outside this terminal implementation.
-
+Supply the trained outline-q4_k_m.gguf separately. The downloader retrieves the
+public Qwen3-4B-Q4_K_M.gguf only; provenance is in strong_model_manifest.json.
+Downloads need internet. Inference does not.
