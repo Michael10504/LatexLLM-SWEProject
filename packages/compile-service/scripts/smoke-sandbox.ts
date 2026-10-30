@@ -5,7 +5,7 @@
  */
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { SandboxRunner } from '../src/sandbox/SandboxRunner';
+import { SandboxRunner, texAlive } from '../src/sandbox/SandboxRunner';
 import { SandboxUnavailableError } from '../src/sandbox/errors';
 
 const FIX = path.resolve(__dirname, '../fixtures');
@@ -38,7 +38,9 @@ async function main(): Promise<void> {
   // 1. basic: cold start + compile + copy out
   let t0 = Date.now();
   const basic = await runner.ensureRunning('smoke-basic', path.join(FIX, 'basic'));
-  await runner.prepareBuildDirs(basic);
+  const mirror = await runner.prepareBuildDirs(basic);
+  const dirs = await runner.exec(basic, ['test', '-d', '/build/chapters']);
+  check('subfolders mirrored into /build (C8)', mirror.code === 0 && dirs.code === 0, `mirror exit ${mirror.code}, /build/chapters ${dirs.code === 0 ? 'exists' : 'missing'}`);
   const r1 = await runner.runLatexmk(basic, { benchmark: true });
   const pdf = await runner.copyOut(basic, '/build/main.pdf');
   check('basic compiles (exit 0) and copies out a PDF', r1.code === 0 && !!pdf, `exit ${r1.code}, ${pdf?.length ?? 0} bytes, ${secs(t0)} cold`);
@@ -66,8 +68,8 @@ async function main(): Promise<void> {
   const how = await runner.killTex(loop);
   ac.abort();
   await running.catch(() => undefined);
-  const procs = (await runner.exec(loop, ['ps', '-eo', 'comm='])).stdout.toString();
-  check('killTex stops TeX, container still up', !/latexmk|pdflatex/.test(procs), `result: ${how}`);
+  const procs = (await runner.exec(loop, ['ps', '-eo', 'stat=,comm='])).stdout.toString();
+  check('killTex stops TeX without a restart, container still up', !texAlive(procs) && how !== 'restarted', `result: ${how}`);
 
   // 5. C10: missing main.tex is rejected before Docker
   try {

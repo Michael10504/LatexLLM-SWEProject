@@ -9,7 +9,11 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest",
-    "smoke": "tsx scripts/smoke-sandbox.ts"
+    "smoke": "tsx scripts/smoke-sandbox.ts",
+    "smoke:compile": "tsx scripts/smoke-compile.ts",
+    "checklist": "tsx scripts/inspect-checklist.ts",
+    "test:docker": "jest -c jest.docker.config.js --runInBand",
+    "benchmark": "tsx scripts/benchmark.ts"
   },
   "license": "UNLICENSED",
   "devDependencies": {

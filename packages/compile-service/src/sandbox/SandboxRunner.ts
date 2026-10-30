@@ -21,7 +21,32 @@ export interface ExecOpts extends RunOpts {
 const TEX_PATTERN = 'latexmk|pdflatex|bibtex|biber';
 const TEX_RE = /latexmk|pdflatex|bibtex|biber/;
 const NO_SUCH = /No such (object|container)/i;
-const QUICK = { timeoutMs: 15_000 };
+/** Safety limit for small docker commands. Generous: a busy Docker Desktop can take >15 s just to start an exec. */
+const QUICK = { timeoutMs: 30_000 };
+
+/**
+ * C8: mirror the project's subfolders into /build. String.raw keeps the backslash, so sh hands
+ * `\;` to find. (A plain '\;' in TS is just ';', which ends the command and makes find fail.)
+ */
+export const MIRROR_DIRS_CMD = String.raw`cd /work && find . -type d -exec mkdir -p /build/{} \;`;
+
+/** Short reason for a failed docker call, for warnings. */
+function describe(r: DockerResult): string {
+  if (r.timedOut) return `no answer from Docker within ${QUICK.timeoutMs / 1000} s; Docker Desktop may be overloaded`;
+  return `exit ${r.code}${r.stderr.trim() ? `: ${r.stderr.trim()}` : ''}`;
+}
+
+/**
+ * `ps -eo stat=,comm=` output → is any TeX process still running?
+ * Zombies (stat Z) are ignored: after latexmk is killed, pdflatex is re-parented to PID 1
+ * (`sleep infinity`), which never reaps it, so it lingers as <defunct> but uses no CPU.
+ */
+export function texAlive(psOutput: string): boolean {
+  return psOutput.split('\n').some((line) => {
+    const [stat = '', ...rest] = line.trim().split(/\s+/);
+    return !stat.startsWith('Z') && TEX_RE.test(rest.join(' '));
+  });
+}
 
 /**
  * The only class that talks to Docker. Wraps the fixed sandbox commands from the WS-3 handoff.
@@ -135,6 +160,14 @@ export class SandboxRunner {
     return { running: running === 'true', dir };
   }
 
+  /** Full `docker inspect` JSON of a container (Step 14 checklist). */
+  async inspectJson(name: string): Promise<Record<string, unknown>> {
+    const r = await this.call(['inspect', name], QUICK);
+    if (r.code !== 0) throw new SandboxUnavailableError(`docker inspect ${name} failed: ${r.stderr.trim()}`);
+    const parsed = JSON.parse(r.stdout.toString('utf8')) as Record<string, unknown>[];
+    return parsed[0];
+  }
+
   /** `docker exec [-e K=V] <name> ...cmd`. Exit codes are returned raw; CompileService interprets them. */
   async exec(name: string, cmd: string[], opts: ExecOpts = {}): Promise<DockerResult> {
     const envArgs = Object.entries(opts.env ?? {}).flatMap(([k, v]) => ['-e', `${k}=${v}`]);
@@ -146,8 +179,13 @@ export class SandboxRunner {
   }
 
   /** C8: mirror the project's subfolders into /build so \include of subfolder files works on pass 1. */
-  prepareBuildDirs(name: string): Promise<DockerResult> {
-    return this.exec(name, ['sh', '-c', 'cd /work && find . -type d -exec mkdir -p /build/{} \;'], QUICK);
+  async prepareBuildDirs(name: string): Promise<DockerResult> {
+    const r = await this.exec(name, ['sh', '-c', MIRROR_DIRS_CMD], QUICK);
+    if (r.code !== 0) {
+      // Not fatal: latexmk can recover, but only with an extra (slow) pdflatex pass.
+      this.log.warn(`[sandbox] mirroring subfolders into /build failed (${describe(r)}); \\include of subfolder files will need an extra pass.`);
+    }
+    return r;
   }
 
   /** The fixed latexmk command. `benchmark` adds -g (force) for NFR-03 runs only. */
@@ -186,11 +224,11 @@ export class SandboxRunner {
    */
   async killTex(name: string): Promise<'killed' | 'none' | 'restarted'> {
     const k = await this.exec(name, ['pkill', '-KILL', '-f', TEX_PATTERN], QUICK);
-    if (k.code !== 0 && k.code !== 1) this.log.warn(`[sandbox] pkill exited ${k.code}: ${k.stderr.trim()}`);
+    if (k.code !== 0 && k.code !== 1) this.log.warn(`[sandbox] pkill did not complete (${describe(k)}); checking with ps.`);
 
     for (let i = 0; i < 5; i++) {
-      const ps = await this.exec(name, ['ps', '-eo', 'comm='], QUICK);
-      const alive = ps.stdout.toString('utf8').split('\n').some((l) => TEX_RE.test(l.trim()));
+      const ps = await this.exec(name, ['ps', '-eo', 'stat=,comm='], QUICK);
+      const alive = texAlive(ps.stdout.toString('utf8'));
       if (!alive) return k.code === 0 ? 'killed' : 'none';
       await this.sleep(200);
     }

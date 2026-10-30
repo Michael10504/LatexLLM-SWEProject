@@ -8,6 +8,8 @@ export interface DockerResult {
   /** Raw stdout. Binary-safe (used for `cat /build/main.pdf`). */
   stdout: Buffer;
   stderr: string;
+  /** True when our own safety timeout killed the docker client (code is then 137). */
+  timedOut?: boolean;
 }
 
 export interface RunOpts {
@@ -67,7 +69,13 @@ export function runDocker(cfg: SandboxConfig, args: string[], opts: RunOpts = {}
       stderr += s;
     });
 
-    const timer = opts.timeoutMs ? setTimeout(() => child.kill(), opts.timeoutMs) : undefined;
+    let timedOut = false;
+    const timer = opts.timeoutMs
+      ? setTimeout(() => {
+          timedOut = true;
+          child.kill();
+        }, opts.timeoutMs)
+      : undefined;
     const onAbort = () => child.kill();
     opts.signal?.addEventListener('abort', onAbort, { once: true });
 
@@ -77,7 +85,7 @@ export function runDocker(cfg: SandboxConfig, args: string[], opts: RunOpts = {}
       );
     });
     child.on('close', (code, signal) => {
-      finish(() => resolve({ code: code ?? (signal ? 137 : -1), stdout: Buffer.concat(chunks), stderr }));
+      finish(() => resolve({ code: code ?? (signal ? 137 : -1), stdout: Buffer.concat(chunks), stderr, ...(timedOut ? { timedOut } : {}) }));
     });
   });
 }

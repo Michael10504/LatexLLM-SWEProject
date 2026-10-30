@@ -46,6 +46,15 @@ describe('runDocker', () => {
     const r = await runDocker(DEFAULT_SANDBOX_CONFIG, ['exec', 'x', 'sleep', '100'], { timeoutMs: 10 });
     expect(child.kill).toHaveBeenCalled();
     expect(r.code).toBe(137);
+    expect(r.timedOut).toBe(true);
+  });
+
+  it('does not flag timedOut on a normal exit', async () => {
+    const child = fakeChild();
+    (spawn as jest.Mock).mockReturnValue(child);
+    const p = runDocker(DEFAULT_SANDBOX_CONFIG, ['version'], { timeoutMs: 5000 });
+    setImmediate(() => child.emit('close', 0, null));
+    expect((await p).timedOut).toBeUndefined();
   });
 
   it('kills the client when aborted', async () => {

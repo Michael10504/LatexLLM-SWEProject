@@ -1,4 +1,4 @@
-import { SandboxRunner } from '../../src/sandbox/SandboxRunner';
+import { MIRROR_DIRS_CMD, SandboxRunner, texAlive } from '../../src/sandbox/SandboxRunner';
 import { ContainerGoneError, ProjectInvalidError, SandboxUnavailableError } from '../../src/sandbox/errors';
 import { DEFAULT_SANDBOX_CONFIG } from '../../src/types';
 import type { DockerResult } from '../../src/sandbox/runDocker';
@@ -29,7 +29,7 @@ function runner(docker: ReturnType<typeof fakeDocker>['docker'], resolveDir: (d:
 const isCmd = (args: string[], ...prefix: string[]) => prefix.every((p, i) => args[i] === p);
 const noSuchContainer: Responder = (a) =>
   isCmd(a, 'inspect') ? { code: 1, stderr: 'Error: No such object: ltx-x' } : undefined;
-const ps = (out: string): Responder => (a) => (a.includes('ps') && a.includes('comm=') ? { stdout: Buffer.from(out) } : undefined);
+const ps = (out: string): Responder => (a) => (a.includes('ps') && a.includes('stat=,comm=') ? { stdout: Buffer.from(out) } : undefined);
 
 describe('SandboxRunner.ensureRunning', () => {
   it('creates a fresh container with exactly the fixed docker run command (golden)', async () => {
@@ -118,7 +118,22 @@ describe('SandboxRunner exec helpers', () => {
   it('prepareBuildDirs mirrors subfolders (C8)', async () => {
     const { docker, calls } = fakeDocker();
     await runner(docker).prepareBuildDirs('ltx-a');
-    expect(calls[0]).toEqual(['exec', 'ltx-a', 'sh', '-c', 'cd /work && find . -type d -exec mkdir -p /build/{} \;']);
+    expect(calls[0].slice(0, 4)).toEqual(['exec', 'ltx-a', 'sh', '-c']);
+    // String.raw: the test sees the exact characters sh receives.
+    expect(calls[0][4]).toBe(String.raw`cd /work && find . -type d -exec mkdir -p /build/{} \;`);
+  });
+
+  it('the mirror command keeps the backslash before ; (a bare ; ends the command and find fails)', () => {
+    expect(MIRROR_DIRS_CMD.endsWith('{} ' + '\\' + ';')).toBe(true);
+    expect(MIRROR_DIRS_CMD).not.toMatch(/\{\} ;$/);
+  });
+
+  it('prepareBuildDirs warns (but does not throw) when mirroring fails', async () => {
+    const warn = jest.fn();
+    const { docker } = fakeDocker(() => ({ code: 1, stderr: "find: missing argument to `-exec'" }));
+    const r = new SandboxRunner(DEFAULT_SANDBOX_CONFIG, { docker, resolveDir: () => HOST, sleep: async () => {}, logger: { warn, debug: jest.fn() } });
+    await expect(r.prepareBuildDirs('ltx-a')).resolves.toMatchObject({ code: 1 });
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('mirroring subfolders into /build failed'));
   });
 
   it('returns non-zero exit codes raw (e.g. 12 for a TeX error)', async () => {
@@ -164,20 +179,42 @@ describe('SandboxRunner.copyOut (C9)', () => {
 
 describe('SandboxRunner.killTex', () => {
   it('kills TeX and confirms it is gone', async () => {
-    const { docker, calls } = fakeDocker(ps('sleep\nps\n'));
+    const { docker, calls } = fakeDocker(ps('S sleep\nR ps\n'));
     await expect(runner(docker).killTex('ltx-a')).resolves.toBe('killed');
     expect(calls[0]).toEqual(['exec', 'ltx-a', 'pkill', '-KILL', '-f', 'latexmk|pdflatex|bibtex|biber']);
     expect(calls.some((a) => a[0] === 'restart')).toBe(false);
   });
+  it('explains a pkill that Docker did not answer in time, then still checks with ps', async () => {
+    const warn = jest.fn();
+    const { docker } = fakeDocker((a) => (a.includes('pkill') ? { code: 137, timedOut: true } : undefined), ps('S sleep\n'));
+    const r = new SandboxRunner(DEFAULT_SANDBOX_CONFIG, { docker, resolveDir: () => HOST, sleep: async () => {}, logger: { warn, debug: jest.fn() } });
+    await expect(r.killTex('ltx-a')).resolves.toBe('none');
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('no answer from Docker within 30 s'));
+  });
   it('treats pkill exit 1 (nothing matched) as fine', async () => {
-    const { docker } = fakeDocker((a) => (a.includes('pkill') ? { code: 1 } : undefined), ps('sleep\n'));
+    const { docker } = fakeDocker((a) => (a.includes('pkill') ? { code: 1 } : undefined), ps('S sleep\n'));
     await expect(runner(docker).killTex('ltx-a')).resolves.toBe('none');
   });
   it('restarts the container if TeX survives 5 checks (C12)', async () => {
-    const { docker, calls } = fakeDocker(ps('sleep\npdflatex\n'));
+    const { docker, calls } = fakeDocker(ps('S sleep\nR pdflatex\n'));
     await expect(runner(docker).killTex('ltx-a')).resolves.toBe('restarted');
-    expect(calls.filter((a) => a.includes('comm='))).toHaveLength(5);
+    expect(calls.filter((a) => a.includes('stat=,comm='))).toHaveLength(5);
     expect(calls.at(-1)).toEqual(['restart', '-t', '0', 'ltx-a']);
+  });
+});
+
+describe('texAlive', () => {
+  it('ignores zombie TeX processes left under sleep infinity', () => {
+    expect(texAlive('S sleep\nZ pdflatex\nZ latexmk\n')).toBe(false);
+  });
+  it('detects running or sleeping TeX', () => {
+    expect(texAlive('S sleep\nR pdflatex\n')).toBe(true);
+    expect(texAlive('Ss latexmk\n')).toBe(true);
+  });
+  it('kills zombies-only as success, no restart', async () => {
+    const { docker, calls } = fakeDocker(ps('S sleep\nZ pdflatex\n'));
+    await expect(runner(docker).killTex('ltx-a')).resolves.toBe('killed');
+    expect(calls.some((a) => a[0] === 'restart')).toBe(false);
   });
 });
 
