@@ -6,17 +6,8 @@ from local_ai import ROOT, STRONG_MODEL, OUTLINE_MODEL, MENU, Runner, validate, 
 from test_run import evaluate_case
 
 class Contracts(unittest.TestCase):
-    def test_five_numbered_tasks(self):
-        self.assertEqual(
-            MENU,
-            {
-                '1': 'notes',
-                '2': 'outline',
-                '3': 'clarity',
-                '4': 'tone',
-                '5': 'grammar'
-            }
-        )
+    def test_four_numbered_tasks(self):
+        self.assertEqual(MENU, {'1':'notes','2':'outline','3':'clarity','4':'tone'})
 
     def test_4b_reused_for_notes_clarity_tone(self):
         runner=Runner()
@@ -37,11 +28,7 @@ class Contracts(unittest.TestCase):
         runner.actual_gpu_layers=12
         backend=Mock()
         backend.llama_supports_gpu_offload.return_value=True
-        with patch.dict('sys.modules',{'llama_cpp':backend}), patch(
-    'pathlib.Path.is_file',
-    autospec=True,
-    side_effect=lambda path: path.name != 'gpu_settings.json'
-):
+        with patch.dict('sys.modules',{'llama_cpp':backend}), patch('pathlib.Path.is_file',return_value=True):
             runner.load('outline')
             old.close.assert_called_once()
             self.assertEqual(backend.Llama.call_args.kwargs['model_path'],str(ROOT/OUTLINE_MODEL))
@@ -59,11 +46,7 @@ class Contracts(unittest.TestCase):
     def test_outline_does_not_silently_fallback(self):
         backend=Mock()
         backend.llama_supports_gpu_offload.return_value=False
-        with patch.dict('sys.modules',{'llama_cpp':backend}),patch(
-    'pathlib.Path.is_file',
-    autospec=True,
-    side_effect=lambda path: path.name != 'gpu_settings.json'
-):
+        with patch.dict('sys.modules',{'llama_cpp':backend}), patch('pathlib.Path.is_file',return_value=True):
             with self.assertRaisesRegex(RuntimeError,'requires GPU'):
                 Runner().load('outline')
         backend.Llama.assert_not_called()
@@ -137,43 +120,6 @@ class Contracts(unittest.TestCase):
         self.assertTrue(all(evaluate_case(row,valid).values()))
         invalid=json.dumps({'sections':[{'heading':'Interpretation','subsections':['Return observations.']}]})
         self.assertFalse(evaluate_case(row,invalid)['actionable writing directions'])
-
-    def test_grammar_empty_selection_never_loads_model(self):
-        runner = Runner()
-        runner.load = Mock()
-
-        with self.assertRaisesRegex(ValueError, 'select text'):
-            runner.run('grammar', '   \n ')
-
-        runner.load.assert_not_called()
-
-    def test_grammar_passes_selected_text_and_returns_suggestion(self):
-        runner = Runner()
-        runner.load = Mock()
-
-        runner.model = Mock(return_value=[
-            {'choices': [
-                {
-                    'text': 'She goes to university every day.',
-                    'finish_reason': 'stop'
-                }
-            ]}
-        ])
-        runner.model.tokenize.return_value = [1]
-
-        selected_text = 'She go to university every day.'
-        result = runner.run('grammar', selected_text)
-
-        runner.load.assert_called_once_with('grammar')
-
-        sent_prompt = runner.model.call_args.args[0]
-        self.assertIn(selected_text, sent_prompt)
-        self.assertIn('Correct grammar', sent_prompt)
-
-        self.assertEqual(
-            result,
-            'She goes to university every day.'
-        )
 
 if __name__=='__main__': unittest.main()
 
