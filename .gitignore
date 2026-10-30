@@ -1,1 +1,9 @@
+client/node_modules/
+server/node_modules/
+server/dist/
+server/prisma/*.db
+server/prisma/*.db-journal
+server/.env
+server/certs/
+server/*.log
 node_modules/
