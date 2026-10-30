@@ -3,12 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "dist/main/main.js",
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
+    "postinstall": "electron-rebuild -f -o better-sqlite3",
+    "build:ws3pkg": "npm --prefix ../packages/compile-service run build",
     "build:tsc": "tsc",
     "build:renderer": "esbuild src/renderer/renderer.ts --bundle --platform=browser --format=iife --outfile=dist/renderer/renderer.js",
+    "build:ws3": "tsc -p tsconfig.ws3.json && node scripts/build-ws3.mjs",
     "build:assets": "copyfiles -u 1 \"src/**/*.html\" \"src/**/*.css\" dist/",
-    "build": "npm run build:tsc && npm run build:renderer && npm run build:assets",
+    "build": "npm run build:ws3pkg && npm run build:tsc && npm run build:renderer && npm run build:ws3 && npm run build:assets",
     "start": "npm run build && electron .",
+    "start:dev": "npm run build && cross-env LTX_DEV=1 electron .",
+    "start:stub": "npm run build && cross-env LTX_STUB_COMPILE=1 LTX_DEV=1 electron .",
     "dev": "concurrently \"tsc -w\" \"npm run build:renderer -- --watch\" \"npm run build:assets\" \"electron .\""
   },
   "repository": {
@@ -24,10 +32,12 @@
   },
   "homepage": "https://github.com/Michael10504/LatexLLM-SWEProject#readme",
   "devDependencies": {
+    "@electron/rebuild": "^4.2.1",
     "@types/better-sqlite3": "^9.6.0",
     "@types/node": "^26.6.5",
     "concurrently": "^10.0.6",
     "copyfiles": "^2.4.1",
+    "cross-env": "^10.1.0",
     "electron": "^45.0.0",
     "esbuild": "^0.28.2",
     "typescript": "^7.0.2"
@@ -35,8 +45,10 @@
   "dependencies": {
     "@codemirror/language": "^6.13.1",
     "@codemirror/legacy-modes": "^6.5.5",
+    "@latexllm/compile-service": "file:../packages/compile-service",
     "better-sqlite3": "^13.0.3",
-    "codemirror": "^6.0.2"
+    "codemirror": "^6.0.2",
+    "pdfjs-dist": "5.4.624"
   },
   "allowScripts": {
     "better-sqlite3@13.0.3": true

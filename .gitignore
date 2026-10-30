@@ -1,9 +1,30 @@
+# Dependencies
+node_modules/
 client/node_modules/
 server/node_modules/
-server/dist/
+
+# Build output (rebuilt by `npm run build`)
+dist/
+build/
+
+# Backend local state
 server/prisma/*.db
 server/prisma/*.db-journal
 server/.env
 server/certs/
+certs/
 server/*.log
-node_modules/
+
+# LaTeX / logs
+*.log
+*.aux
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+package-lock.json.bak
+
+# Keep real TeX logs used as LogParser test fixtures
+!packages/compile-service/fixtures/logs/*.log
+
+# WS-3 smoke-test output
+packages/compile-service/scripts/out/

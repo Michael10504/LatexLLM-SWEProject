@@ -1,0 +1,27 @@
+{
+  "name": "@latexllm/compile-service",
+  "version": "0.1.0",
+  "description": "WS-3: sandboxed LaTeX compilation (Docker) and PDF preview support",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "jest",
+    "smoke": "tsx scripts/smoke-sandbox.ts",
+    "smoke:compile": "tsx scripts/smoke-compile.ts",
+    "checklist": "tsx scripts/inspect-checklist.ts",
+    "test:docker": "jest -c jest.docker.config.js --runInBand",
+    "benchmark": "tsx scripts/benchmark.ts"
+  },
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.19.43",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.15",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}

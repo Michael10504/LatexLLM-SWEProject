@@ -2,6 +2,7 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import { FileStore } from './FileStore';
 import { ProjectRepository } from './ProjectRepository';
+import { registerWs3 } from './ws3';
 
 let fileStore: FileStore;
 let projectRepo: ProjectRepository;
@@ -57,6 +58,13 @@ app.whenReady().then(() => {
 
     ipcMain.handle('get-storage-stats', (_event, { projectId }) => {
         return fileStore.calculateStats(projectId);
+    });
+
+    // WS-3: sandboxed compilation + PDF preview (IF-03). The renderer only sends a project id;
+    // the folder is looked up here from the project registry.
+    registerWs3(ipcMain, {
+        cacheDir: path.join(userDataPath, 'compile-cache'),
+        resolveProject: (id) => (projectRepo.getProject(id) ? { id, rootDir: fileStore.getProjectPath(id) } : undefined)
     });
 
     createWindow();

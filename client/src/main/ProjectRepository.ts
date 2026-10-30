@@ -49,6 +49,11 @@ export class ProjectRepository {
         return stmt.all(ownerId) as Project[];
     }
 
+    public getProject(id: string): Project | undefined {
+        const stmt = this.db.prepare('SELECT * FROM projects WHERE id = ?');
+        return stmt.get(id) as Project | undefined;
+    }
+
     public deleteProject(id: string): void {
         const stmt = this.db.prepare('DELETE FROM projects WHERE id = ?');
         stmt.run(id);

@@ -29,6 +29,7 @@ let isRegisterMode = false;
 let hasUnsavedChanges = false; // Tracks modified document buffer status for UC-03
 let activeProjectId: string | null = null;
 let activeEditor: EditorView | null = null;
+let activeFile = 'main.tex'; // file shown in the editor (relative to the project folder)
 const editorContainer = document.getElementById('editor-view') as HTMLDivElement;
 
 // Project elements
@@ -106,6 +107,7 @@ logoutBtn?.addEventListener('click', async () => {
     activeEditor = null;
     editorContainer.innerHTML = '';
     projectOverlay.style.display = 'none';
+    window.dispatchEvent(new CustomEvent('app:projectClosed')); // WS-3 compile panel
 });
 
 //Project Handling
@@ -162,6 +164,7 @@ async function openProject(id: string, name: string, role: string) {
         saveTimeout = null;
     }
     activeProjectId = id;
+    activeFile = 'main.tex';
     projectOverlay.style.display = 'none';
 
     // Update status bar
@@ -177,6 +180,7 @@ async function openProject(id: string, name: string, role: string) {
         console.error('Failed to open main.tex:', error);
         initEditor('% Error loading main.tex');
     }
+    window.dispatchEvent(new CustomEvent('app:projectOpened', { detail: { id } })); // WS-3 compile panel
 }
 
 let saveTimeout: ReturnType<typeof setTimeout> | null = null;
@@ -198,31 +202,64 @@ const autoSaveExtension = EditorView.updateListener.of((update) => {
 
     if (saveTimeout) clearTimeout(saveTimeout);
     const projectIdToSave = activeProjectId;
-    saveTimeout = setTimeout(async () => {
+    const fileToSave = activeFile;
+    saveTimeout = setTimeout(() => {
         saveTimeout = null;
         if (!projectIdToSave) return;
-
-        const content = update.state.doc.toString();
-        const savingIndicator = document.getElementById('saving-indicator');
-        if (savingIndicator) {
-            savingIndicator.textContent = 'Saving...';
-            savingIndicator.style.color = '#3498db';
-        }
-
-        try {
-            await window.electronAPI.saveFile({ projectId: projectIdToSave, relativePath: 'main.tex', content });
-            hasUnsavedChanges = false;
-            savingIndicator?.remove();
-        } catch (error) {
-            console.error('Auto-save failed:', error);
-            const failedIndicator = document.getElementById('saving-indicator');
-            if (failedIndicator) {
-                failedIndicator.textContent = 'Save Failed!';
-                failedIndicator.style.color = '#e74c3c';
-            }
-        }
+        void saveNow(projectIdToSave, fileToSave, update.state.doc.toString()).catch(() => { /* indicator shows it */ });
     }, AUTO_SAVE_DELAY_MS);
 });
+
+async function saveNow(projectId: string, relativePath: string, content: string): Promise<void> {
+    const savingIndicator = document.getElementById('saving-indicator');
+    if (savingIndicator) {
+        savingIndicator.textContent = 'Saving...';
+        savingIndicator.style.color = '#3498db';
+    }
+    try {
+        await window.electronAPI.saveFile({ projectId, relativePath, content });
+        hasUnsavedChanges = false;
+        savingIndicator?.remove();
+    } catch (error) {
+        console.error('Auto-save failed:', error);
+        const failedIndicator = document.getElementById('saving-indicator');
+        if (failedIndicator) {
+            failedIndicator.textContent = 'Save Failed!';
+            failedIndicator.style.color = '#e74c3c';
+        }
+        throw error;
+    }
+}
+
+/** Saves the open file now if an auto-save is pending (WS-3 "save before compile", C1). */
+async function flushSave(): Promise<void> {
+    if (!saveTimeout || !activeProjectId || !activeEditor) return;
+    clearTimeout(saveTimeout);
+    saveTimeout = null;
+    await saveNow(activeProjectId, activeFile, activeEditor.state.doc.toString());
+}
+
+// Editor hooks for the WS-3 compile panel: save before compile, and jump to file:line from the log.
+window.EditorView = {
+    saveAll: flushSave,
+    async open(relativePath: string) {
+        if (!activeProjectId || relativePath === activeFile) return;
+        await flushSave();
+        const content = await window.electronAPI.readFile({ projectId: activeProjectId, relativePath });
+        activeFile = relativePath;
+        initEditor(content);
+    },
+    setCursor(line: number) {
+        if (!activeEditor) return;
+        const doc = activeEditor.state.doc;
+        const target = doc.line(Math.min(Math.max(1, Math.floor(line)), doc.lines));
+        activeEditor.dispatch({
+            selection: { anchor: target.from, head: target.to },
+            effects: EditorView.scrollIntoView(target.from, { y: 'center' })
+        });
+        activeEditor.focus();
+    }
+};
 
 function initEditor(content: string): void {
     activeEditor?.destroy();
@@ -259,6 +296,9 @@ createProjectBtn?.addEventListener('click', async () => {
     }
 });
 
+
+// LTX_DEV=1 only: the WS-3 panel adds a "Skip login (dev mode)" button that fires this event.
+window.addEventListener('ws3:devLogin', () => enterApp({ username: 'dev', token: '' }));
 
 // Existing IPC Test
 document.getElementById('ping-btn')?.addEventListener('click', async () => {
