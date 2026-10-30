@@ -481,16 +481,6 @@ button:disabled {
     cursor: not-allowed;
 }
 
-.auth-card .auth-bypass {
-    display: block;
-    width: 100%;
-    margin-top: 10px;
-    padding: 9px 10px;
-    color: var(--text);
-    background: transparent;
-    border-color: var(--line);
-}
-
 /* Works on a <button type="button"> (preferred) or any element */
 .auth-card .auth-toggle {
     display: block;

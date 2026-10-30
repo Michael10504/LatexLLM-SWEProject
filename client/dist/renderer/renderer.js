@@ -17,7 +17,7 @@
     }
   };
 
-  // node_modules/@marijn/find-cluster-break/src/index.js
+  // ../node_modules/@marijn/find-cluster-break/src/index.js
   function isExtendingChar(code2) {
     if (code2 < 768) return false;
     for (let from = 0, to = rangeFrom.length; ; ) {
@@ -84,7 +84,7 @@
   }
   var rangeFrom, rangeTo, ZWJ;
   var init_src = __esm({
-    "node_modules/@marijn/find-cluster-break/src/index.js"() {
+    "../node_modules/@marijn/find-cluster-break/src/index.js"() {
       rangeFrom = [];
       rangeTo = [];
       (() => {
@@ -96,7 +96,7 @@
     }
   });
 
-  // node_modules/@codemirror/state/dist/index.js
+  // ../node_modules/@codemirror/state/dist/index.js
   function textLength(text) {
     let length = -1;
     for (let line of text)
@@ -724,7 +724,7 @@
   }
   var Text, TextLeaf, TextNode, RawTextCursor, PartialTextCursor, LineCursor, Line, DefaultSplit, MapMode, ChangeDesc, ChangeSet, SectionIter, SelectionRange, EditorSelection, nextID, Facet, FacetProvider, initField, StateField, Prec_, Prec, PrecExtension, Compartment, CompartmentInstance, Configuration, languageData, allowMultipleSelections, lineSeparator, changeFilter, transactionFilter, transactionExtender, readOnly, Annotation, AnnotationType, StateEffectType, StateEffect, Transaction, none, CharCategory, nonASCIISingleCaseWordChar, wordChar, EditorState, RangeValue, Range, Chunk, RangeSet, RangeSetBuilder, LayerCursor, HeapCursor, SpanCursor;
   var init_dist = __esm({
-    "node_modules/@codemirror/state/dist/index.js"() {
+    "../node_modules/@codemirror/state/dist/index.js"() {
       init_src();
       Text = class _Text {
         /**
@@ -3513,10 +3513,10 @@
     }
   });
 
-  // node_modules/style-mod/src/style-mod.js
+  // ../node_modules/style-mod/src/style-mod.js
   var C, COUNT, SET, top, StyleModule, adoptedSet, StyleSet;
   var init_style_mod = __esm({
-    "node_modules/style-mod/src/style-mod.js"() {
+    "../node_modules/style-mod/src/style-mod.js"() {
       C = "\u037C";
       COUNT = typeof Symbol == "undefined" ? "__" + C : Symbol.for(C);
       SET = typeof Symbol == "undefined" ? "__styleSet" + Math.floor(Math.random() * 1e8) : /* @__PURE__ */ Symbol("styleSet");
@@ -3654,7 +3654,7 @@
     }
   });
 
-  // node_modules/w3c-keyname/index.js
+  // ../node_modules/w3c-keyname/index.js
   function keyName(event) {
     var ignoreKey = mac && event.metaKey && event.shiftKey && !event.ctrlKey && !event.altKey || ie && event.shiftKey && event.key && event.key.length == 1 || event.key == "Unidentified";
     var name2 = !ignoreKey && event.key || (event.shiftKey ? shift : base)[event.keyCode] || event.key || "Unidentified";
@@ -3668,7 +3668,7 @@
   }
   var base, shift, mac, ie, i, i, i, code;
   var init_w3c_keyname = __esm({
-    "node_modules/w3c-keyname/index.js"() {
+    "../node_modules/w3c-keyname/index.js"() {
       base = {
         8: "Backspace",
         9: "Tab",
@@ -3761,7 +3761,7 @@
     }
   });
 
-  // node_modules/crelt/index.js
+  // ../node_modules/crelt/index.js
   function crelt() {
     var elt = arguments[0];
     if (typeof elt == "string") elt = document.createElement(elt);
@@ -3790,11 +3790,11 @@
     }
   }
   var init_crelt = __esm({
-    "node_modules/crelt/index.js"() {
+    "../node_modules/crelt/index.js"() {
     }
   });
 
-  // node_modules/@codemirror/view/dist/index.js
+  // ../node_modules/@codemirror/view/dist/index.js
   function combineAttrs(source, target) {
     for (let name2 in source) {
       if (name2 == "class" && target.class)
@@ -6435,7 +6435,7 @@
   }
   var nav, doc, ie_edge, ie_upto10, ie_11up, ie2, gecko, chrome, webkit, safari, ios, browser, noAttrs, WidgetType, BlockType, Decoration, MarkDecoration, LineDecoration, PointDecoration, BlockWrapper, isElt, isText, DOMSelectionState, preventScrollSupported, scratchRange, DOMPos, Direction, LTR, RTL, LowTypes, ArabicTypes, Brackets, BracketStack, BidiRE, BidiSpan, types, movedOver, clickAddsSelectionRange, dragMovesSelection$1, mouseSelectionStyle, exceptionSink, updateListener, inputHandler, focusChangeEffect, clipboardInputFilter, clipboardOutputFilter, perLineTextDirection, nativeSelectionHidden, scrollHandler, ScrollTarget, scrollIntoView, setEditContextFormatting, editable, nextPluginID, viewPlugin, ViewPlugin, PluginInstance, editorAttributes, contentAttributes, decorations, blockWrappers, outerDecorations, atomicRanges, bidiIsolatedRanges, scrollMargins, styleModule, ChangedRange, ViewUpdate, noChildren, Tile, CompositeTile, DocTile, BlockWrapperTile, LineTile, MarkTile, TextTile, WidgetTile, WidgetBufferTile, TilePointer, OpenWrapper, TileBuilder, TextStream, buckets, TileCache, TileUpdate, lineBaseAttrs, NullWidget, BreakWidget, DocView, DecorationComparator$1, WrapperComparator, BlockGapWidget, PosAssoc, InlineCoordsScan, LineBreakPlaceholder, DOMReader, DOMPoint, DOMChange, InputState, PendingKeys, EmacsyPendingKeys, modifierCodes, dragScrollMargin, MouseSelection, handlers, observers, brokenClipboardAPI, BadMouseDetail, lastMouseDown, lastMouseDownCount, lastMouseDownTime, lastLinewiseCopy, isFocusChange, appliedFirefoxHack, wrappingWhiteSpace, heightChangeFlag, HeightOracle, MeasuredHeights, BlockInfo, QueryType, Epsilon, HeightMap, SpaceDeco, HeightMapBlock, HeightMapText, HeightMapGap, HeightMapBranch, relevantWidgetHeight, NodeBuilder, DecorationComparator2, LineGap, LineGapWidget, ViewState, Viewport, IdScaler, BigScaler, theme, darkTheme, baseThemeID, baseLightID, baseDarkID, lightDarkIDs, baseTheme$1, observeOptions, useCharData, DOMObserver, EditContextManager, EditorView, MaxBidiLine, BadMeasure, CachedOrder, currentPlatform, handleKeyEvents, keymap, Keymaps, storedPrefix, PrefixTimeout, currentKeyEvent, RectangleMarker, LayerView, layerOrder, drawMainRange, selectionConfig, cursorLayer, selectionLayer, selectionBg, hideNativeSelection, setDropCursorPos, dropCursorPos, drawDropCursor, MatchDecorator, UnicodeRegexpSupport, Specials, Names, _supportsTabSize, specialCharConfig, _plugin, DefaultPlaceholder, SpecialCharWidget, TabWidget, lineDeco, activeLineHighlighter, MaxOff, keys, showCrosshair, Outside, TooltipViewManager, tooltipConfig, knownHeight, tooltipPlugin, baseTheme, noOffset, showTooltip, showHoverTooltip, HoverTooltipHost, showHoverTooltipHost, hoverPlugin, HoverPlugin, tooltipMargin, closeHoverTooltipEffect, panelConfig, panelPlugin, PanelGroup, showPanel, dialogField, openDialogEffect, closeDialogEffect, GutterMarker, gutterLineClass, gutterWidgetClass, defaults, activeGutters, unfixGutters, gutterView, UpdateContext, SingleGutterView, GutterElement, lineNumberMarkers, lineNumberWidgetMarker, lineNumberConfig, NumberMarker, lineNumberGutter, activeLineGutterMarker, activeLineGutterHighlighter;
   var init_dist2 = __esm({
-    "node_modules/@codemirror/view/dist/index.js"() {
+    "../node_modules/@codemirror/view/dist/index.js"() {
       init_dist();
       init_style_mod();
       init_w3c_keyname();
@@ -14499,7 +14499,7 @@
     }
   });
 
-  // node_modules/@lezer/common/dist/index.js
+  // ../node_modules/@lezer/common/dist/index.js
   function checkSide(side, pos, from, to) {
     switch (side) {
       case -2:
@@ -14864,7 +14864,7 @@
   }
   var DefaultBufferLength, nextPropID, Range2, NodeProp, MountedTree, noProps, NodeType, NodeSet, CachedNode, CachedInnerNode, IterMode, Tree, FlatBufferCursor, TreeBuffer, BaseNode, TreeNode, BufferContext, BufferNode, StackIterator, TreeCursor, nodeSizeCache, TreeFragment, Parser, StringInput, stoppedInner;
   var init_dist3 = __esm({
-    "node_modules/@lezer/common/dist/index.js"() {
+    "../node_modules/@lezer/common/dist/index.js"() {
       DefaultBufferLength = 1024;
       nextPropID = 0;
       Range2 = class {
@@ -16128,7 +16128,7 @@
     }
   });
 
-  // node_modules/@lezer/highlight/dist/index.js
+  // ../node_modules/@lezer/highlight/dist/index.js
   function sameArray2(a, b) {
     return a.length == b.length && a.every((x, i2) => x == b[i2]);
   }
@@ -16229,7 +16229,7 @@
   }
   var nextTagID, Tag, nextModifierID, Modifier, ruleNodeProp, Rule, HighlightBuilder, t, comment, name, typeName, propertyName, literal, string, number, content, heading, keyword, operator, punctuation, bracket, meta, tags, classHighlighter;
   var init_dist4 = __esm({
-    "node_modules/@lezer/highlight/dist/index.js"() {
+    "../node_modules/@lezer/highlight/dist/index.js"() {
       init_dist3();
       nextTagID = 0;
       Tag = class _Tag {
@@ -16858,7 +16858,7 @@
     }
   });
 
-  // node_modules/@codemirror/streamparser/dist/index.js
+  // ../node_modules/@codemirror/streamparser/dist/index.js
   function countCol(string2, end, tabSize, startIndex = 0, startValue = 0) {
     if (end == null) {
       end = string2.search(/[^\s\u00a0]/);
@@ -16876,7 +16876,7 @@
   }
   var StringStream;
   var init_dist5 = __esm({
-    "node_modules/@codemirror/streamparser/dist/index.js"() {
+    "../node_modules/@codemirror/streamparser/dist/index.js"() {
       StringStream = class {
         /**
         Create a stream.
@@ -17034,7 +17034,7 @@
     }
   });
 
-  // node_modules/@codemirror/language/dist/index.js
+  // ../node_modules/@codemirror/language/dist/index.js
   function defineLanguageFacet(baseData) {
     return Facet.define({
       combine: baseData ? (values) => values.concat(baseData) : void 0
@@ -17600,7 +17600,7 @@
   }
   var _a, languageDataProp, sublanguageProp, Language, DocInput, currentContext, ParseContext, LanguageState, requestIdle, isInputPending, parseWorker, language, indentService, indentUnit, IndentContext, indentNodeProp, TreeIndentContext, DontIndentBeyond, foldService, foldNodeProp, foldEffect, unfoldEffect, foldState, foldCode, unfoldCode, foldAll, unfoldAll, foldKeymap, defaultConfig, foldConfig, foldWidget, PreparedFoldWidget, foldGutterDefaults, FoldMarker, baseTheme$12, HighlightStyle, highlighterFacet, fallbackHighlighter, TreeHighlighter, treeHighlighter, defaultHighlightStyle, baseTheme2, DefaultScanDist, DefaultBrackets, bracketMatchingConfig, matchingMark, nonmatchingMark, bracketMatcher, bracketMatchingUnique, bracketMatchingHandle, IndentedFrom, StreamLanguage, Parse, noTokens, typeArray, nodeSet, warned, byTag, defaultTable, TokenTable, defaultTokenTable, marks;
   var init_dist6 = __esm({
-    "node_modules/@codemirror/language/dist/index.js"() {
+    "../node_modules/@codemirror/language/dist/index.js"() {
       init_dist3();
       init_dist();
       init_dist2();
@@ -18872,7 +18872,7 @@
     }
   });
 
-  // node_modules/@codemirror/commands/dist/index.js
+  // ../node_modules/@codemirror/commands/dist/index.js
   function command(f, option) {
     return ({ state, dispatch }) => {
       if (state.readOnly)
@@ -19444,7 +19444,7 @@
   }
   var toggleComment, toggleLineComment, toggleBlockComment, toggleBlockCommentByLine, SearchMargin, fromHistory, isolateHistory, invertedEffects, historyConfig, historyField_, undo, redo, undoSelection, redoSelection, HistEvent, none2, MaxSelectionsPerEvent, joinableUserEvent, HistoryState, historyKeymap, cursorCharLeft, cursorCharRight, cursorGroupLeft, cursorGroupRight, segmenter, cursorSyntaxLeft, cursorSyntaxRight, cursorLineUp, cursorLineDown, cursorPageUp, cursorPageDown, cursorLineBoundaryForward, cursorLineBoundaryBackward, cursorLineBoundaryLeft, cursorLineBoundaryRight, cursorLineStart, cursorLineEnd, cursorMatchingBracket, selectCharLeft, selectCharRight, selectGroupLeft, selectGroupRight, selectSyntaxLeft, selectSyntaxRight, selectLineUp, selectLineDown, selectPageUp, selectPageDown, selectLineBoundaryForward, selectLineBoundaryBackward, selectLineBoundaryLeft, selectLineBoundaryRight, selectLineStart, selectLineEnd, cursorDocStart, cursorDocEnd, selectDocStart, selectDocEnd, selectAll, selectLine, selectParentSyntax, addCursorAbove, addCursorBelow, simplifySelection, deleteByChar, deleteCharBackward, deleteCharForward, deleteByGroup, deleteGroupBackward, deleteGroupForward, deleteToLineEnd, deleteLineBoundaryBackward, deleteLineBoundaryForward, splitLine, transposeChars, moveLineUp, moveLineDown, copyLineUp, copyLineDown, deleteLine, insertNewlineAndIndent, insertBlankLine, indentSelection, indentMore, indentLess, toggleTabFocusMode, emacsStyleKeymap, standardKeymap, defaultKeymap;
   var init_dist7 = __esm({
-    "node_modules/@codemirror/commands/dist/index.js"() {
+    "../node_modules/@codemirror/commands/dist/index.js"() {
       init_dist();
       init_dist2();
       init_dist6();
@@ -19975,7 +19975,7 @@
     }
   });
 
-  // node_modules/@codemirror/search/dist/index.js
+  // ../node_modules/@codemirror/search/dist/index.js
   function validRegExp(source) {
     try {
       new RegExp(source, baseFlags);
@@ -20131,7 +20131,7 @@
   }
   var basicNormalize, SearchCursor, empty, baseFlags, RegExpCursor, flattened, FlattenedDoc, MultilineRegExpCursor, gotoLine, defaultHighlightOptions, highlightConfig, matchDeco, mainMatchDeco, matchHighlighter, defaultTheme, selectWord, selectNextOccurrence, searchConfigFacet, SearchQuery, QueryType2, StringQuery, RegExpQuery, setSearchQuery, togglePanel, searchState, SearchState, matchMark, selectedMatchMark, searchHighlighter, findNext, findPrevious, selectMatches, selectSelectionMatches, replaceNext, replaceAll, openSearchPanel, closeSearchPanel, searchKeymap, SearchPanel, AnnounceMargin, Break, baseTheme3, searchExtensions;
   var init_dist8 = __esm({
-    "node_modules/@codemirror/search/dist/index.js"() {
+    "../node_modules/@codemirror/search/dist/index.js"() {
       init_dist2();
       init_dist();
       init_crelt();
@@ -21073,7 +21073,7 @@
     }
   });
 
-  // node_modules/@codemirror/autocomplete/dist/index.js
+  // ../node_modules/@codemirror/autocomplete/dist/index.js
   function toSet(chars) {
     let flat = Object.keys(chars).join("");
     let words = /\w/.test(flat);
@@ -21553,7 +21553,7 @@
   }
   var CompletionContext, Option, pickedCompletion, SourceCache, startCompletionEffect, closeCompletionEffect, FuzzyMatcher, StrictMatcher, completionConfig, setSelectedEffect, CompletionTooltip, CompletionDialog, CompletionState, baseAttrs, noAttrs2, none3, ActiveSource, ActiveResult, setActiveEffect, completionState, createTooltip, acceptCompletion, startCompletion, closeCompletion, RunningQuery, MaxUpdateCount, MinAbortTime, completionPlugin, windows, commitCharacters, baseTheme4, defaults2, closeBracketEffect, closedBracket, bracketState, definedClosing, android, inputHandler2, deleteBracketPair, closeBracketsKeymap, completionKeymap, completionKeymapExt;
   var init_dist9 = __esm({
-    "node_modules/@codemirror/autocomplete/dist/index.js"() {
+    "../node_modules/@codemirror/autocomplete/dist/index.js"() {
       init_dist();
       init_dist2();
       init_dist6();
@@ -22668,7 +22668,7 @@
     }
   });
 
-  // node_modules/@codemirror/lint/dist/index.js
+  // ../node_modules/@codemirror/lint/dist/index.js
   function findDiagnostic(diagnostics, diagnostic = null, after = 0) {
     let found = null;
     diagnostics.between(after, 1e9, (from, to, { spec }) => {
@@ -22791,7 +22791,7 @@
   }
   var SelectedDiagnostic, LintState, setDiagnosticsEffect, togglePanel2, movePanelSelection, lintState, activeMark, openLintPanel, closeLintPanel, nextDiagnostic, lintKeymap, lintConfig, DiagnosticWidget, PanelItem, LintPanel, baseTheme5, lintHover, lintExtensions;
   var init_dist10 = __esm({
-    "node_modules/@codemirror/lint/dist/index.js"() {
+    "../node_modules/@codemirror/lint/dist/index.js"() {
       init_dist2();
       init_dist();
       init_crelt();
@@ -23285,10 +23285,10 @@
     }
   });
 
-  // node_modules/codemirror/dist/index.js
+  // ../node_modules/codemirror/dist/index.js
   var basicSetup;
   var init_dist11 = __esm({
-    "node_modules/codemirror/dist/index.js"() {
+    "../node_modules/codemirror/dist/index.js"() {
       init_dist2();
       init_dist2();
       init_dist();
@@ -23328,7 +23328,7 @@
     }
   });
 
-  // node_modules/@codemirror/legacy-modes/mode/stex.js
+  // ../node_modules/@codemirror/legacy-modes/mode/stex.js
   function mkStex(mathMode) {
     function pushCommand(state, command2) {
       state.cmdState.push(command2);
@@ -23556,7 +23556,7 @@
   }
   var stex, stexMath;
   var init_stex = __esm({
-    "node_modules/@codemirror/legacy-modes/mode/stex.js"() {
+    "../node_modules/@codemirror/legacy-modes/mode/stex.js"() {
       stex = mkStex(false);
       stexMath = mkStex(true);
     }
@@ -23617,7 +23617,6 @@
       var passwordInput = document.getElementById("password-input");
       var authSubmitBtn = document.getElementById("auth-submit-btn");
       var authToggleBtn = document.getElementById("auth-toggle-btn");
-      var authBypassBtn = document.getElementById("auth-bypass-btn");
       var userStatus = document.getElementById("user-status");
       var logoutBtn = document.getElementById("logout-btn");
       function enterApp(user) {
@@ -23628,9 +23627,6 @@
         userStatus.innerText = `User: ${user.username}`;
         logoutBtn.style.display = "inline-block";
       }
-      authBypassBtn?.addEventListener("click", () => {
-        enterApp({ username: "test-user", token: "" });
-      });
       authToggleBtn?.addEventListener("click", () => {
         isRegisterMode = !isRegisterMode;
         authTitle.innerText = isRegisterMode ? "Register Account" : "Login";

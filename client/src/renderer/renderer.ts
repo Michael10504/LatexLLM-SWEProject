@@ -48,7 +48,6 @@ const usernameInput = document.getElementById('username-input') as HTMLInputElem
 const passwordInput = document.getElementById('password-input') as HTMLInputElement;
 const authSubmitBtn = document.getElementById('auth-submit-btn') as HTMLButtonElement;
 const authToggleBtn = document.getElementById('auth-toggle-btn') as HTMLButtonElement;
-const authBypassBtn = document.getElementById('auth-bypass-btn') as HTMLButtonElement;
 const userStatus = document.getElementById('user-status') as HTMLSpanElement;
 const logoutBtn = document.getElementById('logout-btn') as HTMLButtonElement;
 
@@ -60,10 +59,6 @@ function enterApp(user: AuthUser): void {
     userStatus.innerText = `User: ${user.username}`;
     logoutBtn.style.display = 'inline-block';
 }
-
-authBypassBtn?.addEventListener('click', () => {
-    enterApp({ username: 'test-user', token: '' });
-});
 
 authToggleBtn?.addEventListener('click', () => {
     isRegisterMode = !isRegisterMode;
