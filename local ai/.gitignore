@@ -1,0 +1,17 @@
+# Downloaded weights and installers stay local; use the setup script after cloning.
+*.gguf
+*.gguf.*
+*.whl
+*.part
+*.verified-download
+__pycache__/
+*.py[cod]
+.venv/
+.vscode/
+reports/
+# Hardware-specific setting; use gpu_settings.example.json as a template.
+gpu_settings.json
+
+# Preserved superseded diagnostics (active report is requirements_report.txt).
+_archive/
+requirements_report.tmp

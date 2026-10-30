@@ -1,0 +1,126 @@
+[
+  {
+    "id": "notes-research-context",
+    "task_id": "notes",
+    "text": "A university library piloted extended evening hours during a four-week examination period. The pilot covered one branch and recorded 640 evening visits. Students interviewed at the exit often mentioned access to quiet seating, but the interviews were voluntary and did not include students who stayed away. Staff reported that the final hour was usually less busy than the preceding two hours. No comparable visit counts were available from the previous examination period, so the pilot cannot establish that longer hours increased total library use. The planning team proposed collecting baseline counts before repeating the pilot; that proposal has not yet been implemented.",
+    "review": [
+      "Organize purpose/design, observed use, limitations and the unimplemented proposal into themes.",
+      "Do not infer increased overall attendance, representative student preferences or an implemented baseline study.",
+      "Combine related evidence rather than producing one note per sentence."
+    ],
+    "checks": {
+      "notes": true,
+      "max_notes": 7,
+      "preserve": [
+        "640"
+      ],
+      "concepts": [
+        {
+          "name": "baseline limitation",
+          "patterns": [
+            "baseline",
+            "comparab",
+            "previous"
+          ]
+        },
+        {
+          "name": "voluntary sampling limitation",
+          "patterns": [
+            "voluntar",
+            "self.select",
+            "representative"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "notes-mixed-results",
+    "task_id": "notes",
+    "text": "Two workshop teams evaluated a new assembly guide using the same prototype. In the first team, assembly time fell from 52 minutes to 41 minutes after the guide was introduced. The second team recorded 46 minutes with either guide. Participants had different levels of prior experience, and the team assignments were not randomized. Several participants said that the diagrams were easier to follow, although diagram readability was not measured formally. A missing component delayed one session, and that session was excluded from the timing comparison. The observations suggest a possible benefit in some conditions, but they do not isolate the effect of the guide from experience or session conditions.",
+    "review": [
+      "Separate the mixed timing observations, informal feedback and design limitations.",
+      "Do not average the teams, claim a universal improvement or treat feedback as a formal readability score."
+    ],
+    "checks": {
+      "notes": true,
+      "max_notes": 7,
+      "preserve": [
+        "52",
+        "41",
+        "46"
+      ],
+      "concepts": [
+        {
+          "name": "experience confounding",
+          "patterns": [
+            "experience",
+            "confound"
+          ]
+        },
+        {
+          "name": "nonrandom allocation",
+          "patterns": [
+            "random"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "notes-procedure-context",
+    "task_id": "notes",
+    "text": "Before sediment samples can be weighed, the containers must be labeled and their empty mass recorded. Samples are then dried at 60 degrees Celsius for 24 hours and allowed to cool in a sealed chamber. Weighing a hot sample can affect the measurement, so cooling must precede the final weighing. The dry sample mass is obtained by subtracting the empty container mass. The protocol describes preparation and measurement only; it does not specify how sampling sites should be selected. A technician suggested adding a site-selection procedure, but no such procedure was approved.",
+    "review": [
+      "Group preparation and measurement steps; preserve their dependency/order.",
+      "Distinguish the unspecified site-selection procedure from the unapproved suggestion."
+    ],
+    "checks": {
+      "notes": true,
+      "max_notes": 7,
+      "preserve": [
+        "60",
+        "24"
+      ],
+      "concepts": [
+        {
+          "name": "cooling before weighing",
+          "patterns": [
+            "cool"
+          ]
+        },
+        {
+          "name": "container subtraction",
+          "patterns": [
+            "subtract",
+            "empty.*mass",
+            "container.*mass"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "id": "notes-sparse-context",
+    "task_id": "notes",
+    "text": "The archive has received a donation of photographs. Their dates and locations have not yet been verified. A cataloguing plan will be discussed at the next meeting.",
+    "review": [
+      "Produce a small set of notes acknowledging unknown dates/locations and a pending discussion.",
+      "Do not invent a collection date, location, donor identity, approved plan or findings."
+    ],
+    "checks": {
+      "notes": true,
+      "max_notes": 4,
+      "concepts": [
+        {
+          "name": "unverified metadata",
+          "patterns": [
+            "verif",
+            "unknown",
+            "undetermined"
+          ]
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,4 @@
+{
+  "vulkan_visible_devices": "1",
+  "device_note": "Example only: select the NVIDIA Vulkan device index for YOUR machine. For multiple NVIDIA GPUs also add nvidia_uuid (from nvidia-smi); it must match the backend device. Automatic layers use live memory and a 1430 MiB AI cap. Copy to gpu_settings.json."
+}
