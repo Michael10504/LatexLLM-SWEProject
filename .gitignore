@@ -1,6 +1,21 @@
+# Dependencies
 node_modules/
+client/node_modules/
+server/node_modules/
+
+# Build output (rebuilt by `npm run build`)
 dist/
 build/
+
+# Backend local state
+server/prisma/*.db
+server/prisma/*.db-journal
+server/.env
+server/certs/
+certs/
+server/*.log
+
+# LaTeX / logs
 *.log
 *.aux
 *.fls

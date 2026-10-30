@@ -8,15 +8,16 @@
   },
   "scripts": {
     "postinstall": "electron-rebuild -f -o better-sqlite3",
-    "build:ws3pkg": "npm --prefix packages/compile-service run build",
+    "build:ws3pkg": "npm --prefix ../packages/compile-service run build",
     "build:tsc": "tsc",
+    "build:renderer": "esbuild src/renderer/renderer.ts --bundle --platform=browser --format=iife --outfile=dist/renderer/renderer.js",
     "build:ws3": "tsc -p tsconfig.ws3.json && node scripts/build-ws3.mjs",
     "build:assets": "copyfiles -u 1 \"src/**/*.html\" \"src/**/*.css\" dist/",
-    "build": "npm run build:ws3pkg && npm run build:tsc && npm run build:ws3 && npm run build:assets",
+    "build": "npm run build:ws3pkg && npm run build:tsc && npm run build:renderer && npm run build:ws3 && npm run build:assets",
     "start": "npm run build && electron .",
-    "dev": "concurrently \"tsc -w\" \"npm run build:assets\" \"electron .\"",
     "start:dev": "npm run build && cross-env LTX_DEV=1 electron .",
-    "start:stub": "npm run build && cross-env LTX_STUB_COMPILE=1 LTX_DEV=1 electron ."
+    "start:stub": "npm run build && cross-env LTX_STUB_COMPILE=1 LTX_DEV=1 electron .",
+    "dev": "concurrently \"tsc -w\" \"npm run build:renderer -- --watch\" \"npm run build:assets\" \"electron .\""
   },
   "repository": {
     "type": "git",
@@ -42,8 +43,11 @@
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "@latexllm/compile-service": "file:packages/compile-service",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/legacy-modes": "^6.5.5",
+    "@latexllm/compile-service": "file:../packages/compile-service",
     "better-sqlite3": "^13.0.3",
+    "codemirror": "^6.0.2",
     "pdfjs-dist": "5.4.624"
   },
   "allowScripts": {

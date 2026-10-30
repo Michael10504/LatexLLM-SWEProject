@@ -43,6 +43,12 @@ declare global {
                 projectId: string;
             }) => Promise<StorageStats>;
         };
+        /** Editor hooks used by the WS-3 compile panel (set by renderer.ts; see compilePanel.ts). */
+        EditorView?: {
+            open(relativePath: string): Promise<void>;
+            setCursor(line: number): void;
+            saveAll(): Promise<void>;
+        };
         /** WS-3 compile + preview bridge (see src/preload/preload.ts). */
         ws3: Ws3Api & {
             info: () => Promise<{ stub: boolean; dev: boolean }>;

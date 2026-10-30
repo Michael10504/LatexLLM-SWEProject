@@ -2,9 +2,10 @@
  * WS-3 renderer: Compile / Cancel, PDF preview (pdf.js), Outdated banner, clickable compile log.
  * Bundled with esbuild into dist/renderer/ws3.js (pdf.js is an ES module, the shell's tsc build is not).
  *
- * Editor contract with Member 2 (Step 9): if the shell defines window.EditorView with
- *   open(relativePath, absPath) and setCursor(line) (and optionally saveAll()),
- * clicks on log entries use it. Until then a minimal textarea editor (FallbackEditor) stands in.
+ * Shell contract (Member 2, client/src/renderer/renderer.ts):
+ *   - window.EditorView = { open(relativePath), setCursor(line), saveAll() } wraps the CodeMirror editor;
+ *   - the shell fires `app:projectOpened` {id} / `app:projectClosed` on window when a project opens/closes;
+ *   - the shell listens for `ws3:devLogin` (LTX_DEV=1 only) to skip the login overlay.
  */
 import * as pdfjsLib from 'pdfjs-dist';
 import type { CompileResultForRenderer, LogEntry } from '@latexllm/compile-service';
@@ -13,18 +14,7 @@ import { formatLogEntry, summarizeLog } from '@latexllm/compile-service/src/ui/l
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.mjs';
 
-interface EditorHook {
-    openProject?(projectId: string): Promise<void>;
-    open(relativePath: string, absPath?: string): Promise<void> | void;
-    setCursor(line: number): void;
-    saveAll?(): Promise<void>;
-}
-
-declare global {
-    interface Window {
-        EditorView?: EditorHook;
-    }
-}
+type EditorHook = NonNullable<Window['EditorView']>;
 
 const $ = <T extends HTMLElement>(sel: string, root: ParentNode = document) => root.querySelector(sel) as T | null;
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, props: Record<string, unknown> = {}, ...kids: (Node | string)[]): HTMLElementTagNameMap[K] {
@@ -32,86 +22,6 @@ function el<K extends keyof HTMLElementTagNameMap>(tag: K, props: Record<string,
     Object.assign(e, props);
     e.append(...kids);
     return e;
-}
-
-/* ------------------------------------------------------------------ fallback editor */
-
-/** Stand-in until Member 2's EditorView exists: one textarea, one file at a time, saves via electronAPI. */
-class FallbackEditor implements EditorHook {
-    private projectId: string | null = null;
-    private file: string | null = null;
-    private dirty = false;
-    private readonly root = $<HTMLDivElement>('#editor-view')!;
-    private readonly fileLabel = el('span', { className: 'ws3-file' });
-    private readonly saveBtn = el('button', { type: 'button', textContent: 'Save', disabled: true, title: 'Save (Ctrl+S)' });
-    private readonly area = el('textarea', { className: 'ws3-editor', spellcheck: false, disabled: true, placeholder: 'Open a project to edit main.tex' });
-
-    constructor(private readonly notify: (msg: string, tone?: string) => void) {
-        const bar = el('div', { className: 'ws3-editor-bar' }, this.fileLabel, this.saveBtn);
-        this.root.append(bar, this.area);
-        this.saveBtn.addEventListener('click', () => void this.saveAll().catch((e) => notify(String(e?.message ?? e), 'error')));
-        this.area.addEventListener('input', () => this.setDirty(true));
-        this.area.addEventListener('keydown', (ev) => {
-            if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 's') {
-                ev.preventDefault();
-                void this.saveAll().catch((e) => notify(String(e?.message ?? e), 'error'));
-            } else if (ev.key === 'Tab' && !ev.ctrlKey && !ev.altKey) {
-                ev.preventDefault();
-                this.area.setRangeText('  ', this.area.selectionStart, this.area.selectionEnd, 'end');
-                this.setDirty(true);
-            }
-        });
-    }
-
-    private setDirty(d: boolean) {
-        this.dirty = d;
-        this.saveBtn.disabled = !d;
-        this.fileLabel.textContent = this.file ? `${this.file}${d ? ' •' : ''}` : '';
-    }
-
-    async openProject(projectId: string): Promise<void> {
-        await this.saveAll();
-        this.projectId = projectId;
-        this.file = null;
-        await this.open('main.tex');
-    }
-
-    async open(relativePath: string): Promise<void> {
-        if (!this.projectId) return;
-        if (this.file === relativePath) return;
-        await this.saveAll();
-        const text = await window.electronAPI.readFile({ projectId: this.projectId, relativePath });
-        this.file = relativePath;
-        this.area.value = text;
-        this.area.disabled = false;
-        this.setDirty(false);
-    }
-
-    setCursor(line: number): void {
-        const lines = this.area.value.split('\n');
-        const n = Math.min(Math.max(1, line), lines.length);
-        let start = 0;
-        for (let i = 0; i < n - 1; i++) start += lines[i].length + 1;
-        const end = start + lines[n - 1].length;
-        this.area.focus();
-        this.area.setSelectionRange(start, end);
-        const lh = parseFloat(getComputedStyle(this.area).lineHeight) || 20;
-        this.area.scrollTop = Math.max(0, (n - 1) * lh - this.area.clientHeight / 3);
-    }
-
-    async saveAll(): Promise<void> {
-        if (!this.dirty || !this.projectId || !this.file) return;
-        await window.electronAPI.saveFile({ projectId: this.projectId, relativePath: this.file, content: this.area.value });
-        this.setDirty(false);
-    }
-
-    clear(): void {
-        this.projectId = null;
-        this.file = null;
-        this.area.value = '';
-        this.area.disabled = true;
-        this.setDirty(false);
-    }
 }
 
 /* ------------------------------------------------------------------ PDF preview */
@@ -174,19 +84,13 @@ type Tone = 'ok' | 'error' | 'busy' | 'idle';
 
 class CompilePanel {
     private projectId: string | null = null;
-    private ownerId: string | null = null;
     private compileSeq = 0;
     private running = 0;
     private tick: number | undefined;
 
-    private readonly editor: EditorHook;
-    private readonly fallback: FallbackEditor | null;
+    private get editor(): EditorHook | undefined { return window.EditorView; }
     private readonly preview: PdfPreview;
 
-    // status bar: project picker
-    private readonly projectSelect = el('select', { id: 'ws3-project', title: 'Project', disabled: true });
-    private readonly newName = el('input', { type: 'text', placeholder: 'New project name', maxLength: 100, className: 'ws3-new-name', disabled: true });
-    private readonly createBtn = el('button', { type: 'button', textContent: 'Create', disabled: true });
     private readonly modeChip = el('span', { className: 'ws3-chip' });
 
     // preview pane
@@ -202,29 +106,20 @@ class CompilePanel {
 
     constructor() {
         const pane = $<HTMLDivElement>('#pdf-preview')!;
-        const toolbar = el('div', { className: 'ws3-toolbar' }, this.compileBtn, this.cancelBtn, el('span', { className: 'ws3-state' }, this.dot, this.statusText));
+        const toolbar = el('div', { className: 'ws3-toolbar' }, this.compileBtn, this.cancelBtn, el('span', { className: 'ws3-state' }, this.dot, this.statusText), this.modeChip);
         this.logBox.append(this.logSummary, this.logList);
         pane.append(toolbar, this.banner, this.logBox);
         this.preview = new PdfPreview(pane);
         document.body.append(this.toast);
 
-        const statusBar = $<HTMLDivElement>('#status-bar')!;
-        const picker = el('span', { className: 'ws3-picker' }, this.projectSelect, this.newName, this.createBtn, this.modeChip);
-        statusBar.insertBefore(picker, $('#user-status')!.nextSibling);
-
-        this.fallback = window.EditorView ? null : new FallbackEditor((m, t) => this.notify(m, t));
-        this.editor = window.EditorView ?? this.fallback!;
-
         this.compileBtn.addEventListener('click', () => void this.compile());
         this.cancelBtn.addEventListener('click', () => void this.cancel());
-        this.projectSelect.addEventListener('change', () => void this.openProject(this.projectSelect.value || null));
-        this.createBtn.addEventListener('click', () => void this.createProject());
-        this.newName.addEventListener('keydown', (e) => { if (e.key === 'Enter') void this.createProject(); });
         document.addEventListener('keydown', (e) => {
             if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !this.compileBtn.disabled) { e.preventDefault(); void this.compile(); }
         });
-        window.addEventListener('app:login', (e) => void this.login((e as CustomEvent<{ username: string }>).detail.username));
-        window.addEventListener('app:logout', () => this.logout());
+        // The shell owns login, the project list and the editor; the panel follows the open project.
+        window.addEventListener('app:projectOpened', (e) => void this.openProject((e as CustomEvent<{ id: string }>).detail.id));
+        window.addEventListener('app:projectClosed', () => void this.openProject(null));
 
         void this.init();
     }
@@ -241,57 +136,9 @@ class CompilePanel {
         const card = $<HTMLDivElement>('.auth-card');
         if (!card) return;
         const btn = el('button', { type: 'button', className: 'auth-toggle', textContent: 'Skip login (dev mode)' });
-        btn.addEventListener('click', () => {
-            const overlay = $<HTMLDivElement>('#auth-overlay');
-            if (overlay) overlay.style.display = 'none';
-            const user = $<HTMLSpanElement>('#user-status');
-            if (user) user.innerText = 'User: dev (login skipped)';
-            void this.login('dev');
-        });
+        // The shell enters the app as user "dev" and shows its own project overlay.
+        btn.addEventListener('click', () => window.dispatchEvent(new CustomEvent('ws3:devLogin')));
         card.append(btn);
-    }
-
-    private async login(ownerId: string) {
-        this.ownerId = ownerId;
-        this.newName.disabled = false;
-        this.createBtn.disabled = false;
-        await this.refreshProjects();
-    }
-
-    private logout() {
-        this.ownerId = null;
-        void this.openProject(null);
-        this.projectSelect.replaceChildren();
-        this.projectSelect.disabled = true;
-        this.newName.disabled = true;
-        this.createBtn.disabled = true;
-    }
-
-    private async refreshProjects(selectId?: string) {
-        if (!this.ownerId) return;
-        const projects = await window.electronAPI.listProjects({ ownerId: this.ownerId });
-        this.projectSelect.replaceChildren(
-            el('option', { value: '', textContent: projects.length ? 'Select a project…' : 'No projects yet' }),
-            ...projects.map((p) => el('option', { value: p.id, textContent: p.name }))
-        );
-        this.projectSelect.disabled = projects.length === 0;
-        const target = selectId ?? (projects.length === 1 ? projects[0].id : '');
-        if (target) {
-            this.projectSelect.value = target;
-            await this.openProject(target);
-        }
-    }
-
-    private async createProject() {
-        const name = this.newName.value.trim();
-        if (!name || !this.ownerId) return;
-        try {
-            const p = await window.electronAPI.createProject({ name, ownerId: this.ownerId });
-            this.newName.value = '';
-            await this.refreshProjects(p.id);
-        } catch (e) {
-            this.notify(cleanIpcError(e), 'error');
-        }
     }
 
     private async openProject(id: string | null) {
@@ -305,17 +152,11 @@ class CompilePanel {
         this.compileBtn.disabled = !id;
         this.cancelBtn.disabled = true;
         if (!id) {
-            this.fallback?.clear();
             this.setStatus('idle', 'No project open');
             this.showBanner(undefined);
             return;
         }
         window.ws3.projectOpened(id);
-        try {
-            await this.editor.openProject?.(id);
-        } catch (e) {
-            this.notify(`Could not open main.tex: ${cleanIpcError(e)}`, 'error');
-        }
         // Step 10: reload the last good PDF and log when a project opens.
         const [pdf, log] = await Promise.all([window.ws3.getPdf(id), window.ws3.getLatestLog(id)]);
         if (this.projectId !== id) return;
@@ -329,7 +170,7 @@ class CompilePanel {
         if (!id) return;
         const seq = ++this.compileSeq;
         try {
-            await (this.editor.saveAll?.() ?? Promise.resolve()); // C1: compile what is on disk
+            await this.editor?.saveAll(); // C1: compile what is on disk (flushes the shell's auto-save)
         } catch (e) {
             this.notify(`Save failed, compile not started: ${cleanIpcError(e)}`, 'error');
             return;
@@ -435,9 +276,11 @@ class CompilePanel {
         if (!id) return;
         const t = await window.ws3.resolveLogClick(id, entry);
         if (t.kind === 'open') {
+            const editor = this.editor;
+            if (!editor) { this.notify('The editor is not available', 'error'); return; }
             try {
-                await this.editor.open(t.file, t.absPath);
-                this.editor.setCursor(t.line);
+                await editor.open(t.file);
+                editor.setCursor(t.line);
             } catch (e) {
                 this.notify(`Could not open ${t.file}: ${cleanIpcError(e)}`, 'error');
             }
