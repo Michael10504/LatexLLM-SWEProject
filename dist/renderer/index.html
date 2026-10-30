@@ -19,18 +19,19 @@
         </span>
     </div>
 
-    <div id="editor-view">
-        <h2>Editor View</h2>
-    </div>
+    <!-- Workspace Container -->
+    <div class="workspace">
+        <div id="editor-view"></div>
 
-    <div id="pdf-preview">
-        <h2>PDF Preview</h2>
-    </div>
+        <div id="pdf-preview">
+            <h2>PDF Preview (Coming Soon)</h2>
+        </div>
 
-    <div id="ai-panel">
-        <h2>AI Panel</h2>
-        <button id="ping-btn" style="margin-top: 20px; padding: 8px;">Test IPC Bridge</button>
-        <p id="ping-response" style="margin-top: 10px; font-size: 12px;"></p>
+        <div id="ai-panel">
+            <h2>AI Panel</h2>
+            <button id="ping-btn" style="margin-top: 20px; padding: 8px;">Test IPC Bridge</button>
+            <p id="ping-response" style="margin-top: 10px; font-size: 12px;"></p>
+        </div>
     </div>
 
     <!-- Auth Overlay -->
@@ -49,8 +50,34 @@
                 <input type="password" id="password-input" placeholder="Min 8 characters">
             </div>
 
-            <button id="auth-submit-btn" class="auth-btn">Sign In</button>
-            <div id="auth-toggle-btn" class="auth-toggle">Need an account? Register</div>
+            <button id="auth-submit-btn" class="auth-btn" type="button">Sign In</button>
+            <button id="auth-bypass-btn" class="auth-bypass" type="button">Continue as test user</button>
+            <button id="auth-toggle-btn" class="auth-toggle" type="button">Need an account? Register</button>
+        </div>
+    </div>
+
+    <!-- Project Selection Overlay -->
+    <div id="project-overlay" style="display: none;">
+        <div class="auth-card" style="width: 450px;">
+            <h2>Your Projects</h2>
+
+            <!-- List Container -->
+            <div id="project-list" class="project-list">
+                <!-- Projects will be injected here via TypeScript -->
+            </div>
+
+            <hr style="border-color: #444; margin: 16px 0;">
+
+            <!-- Create New Project -->
+            <div class="auth-field">
+                <label for="new-project-name">Create New Project</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="new-project-name" placeholder="Project Name (1-100 chars)" style="flex: 1;">
+                    <button id="create-project-btn" class="auth-btn"
+                        style="width: auto; padding: 8px 16px;">Create</button>
+                </div>
+            </div>
+            <div id="project-error" class="auth-error"></div>
         </div>
     </div>
 

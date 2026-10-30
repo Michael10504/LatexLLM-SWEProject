@@ -5,10 +5,11 @@
   "main": "dist/main/main.js",
   "scripts": {
     "build:tsc": "tsc",
+    "build:renderer": "esbuild src/renderer/renderer.ts --bundle --platform=browser --format=iife --outfile=dist/renderer/renderer.js",
     "build:assets": "copyfiles -u 1 \"src/**/*.html\" \"src/**/*.css\" dist/",
-    "build": "npm run build:tsc && npm run build:assets",
+    "build": "npm run build:tsc && npm run build:renderer && npm run build:assets",
     "start": "npm run build && electron .",
-    "dev": "concurrently \"tsc -w\" \"npm run build:assets\" \"electron .\""
+    "dev": "concurrently \"tsc -w\" \"npm run build:renderer -- --watch\" \"npm run build:assets\" \"electron .\""
   },
   "repository": {
     "type": "git",
@@ -28,10 +29,14 @@
     "concurrently": "^10.0.6",
     "copyfiles": "^2.4.1",
     "electron": "^45.0.0",
+    "esbuild": "^0.28.2",
     "typescript": "^7.0.2"
   },
   "dependencies": {
-    "better-sqlite3": "^13.0.3"
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/legacy-modes": "^6.5.5",
+    "better-sqlite3": "^13.0.3",
+    "codemirror": "^6.0.2"
   },
   "allowScripts": {
     "better-sqlite3@13.0.3": true
