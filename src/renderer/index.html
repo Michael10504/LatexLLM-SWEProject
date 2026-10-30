@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>LaTeX Local LLM Editor</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self' http://localhost:3443;">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./ai-panel.css">
+
+</head>
+
+<body>
+    <div id="status-bar">
+        <span id="user-status">User: Not Logged In</span>
+        <span style="margin-left: auto;">
+            <button id="logout-btn"
+                style="display: none; padding: 4px 12px; background: #c53030; color: white; border: none; border-radius: 3px; cursor: pointer;">Logout</button>
+        </span>
+    </div>
+
+    <div id="editor-view">
+        <h2>Editor View</h2>
+    </div>
+
+    <div id="pdf-preview">
+        <h2>PDF Preview</h2>
+    </div>
+
+    <div id="ai-panel">
+        <h2>AI Panel</h2>
+        <p><strong>Demo stub — real model integration pending.</strong></p>
+        <label class="ws5-label" for="ws5-task">AI task</label>
+        <select id="ws5-task"></select>
+        <p id="ws5-selection-status">Editor selection integration pending.</p>
+        <div id="ws5-controls">
+            <button id="ws5-run" type="button" class="primary">Run task</button>
+            <button id="ws5-cancel" type="button" hidden>Cancel</button>
+        </div>
+        <progress id="ws5-progress" aria-label="AI request in progress" hidden></progress>
+        <p id="ws5-status" role="status" aria-live="polite"></p>
+        <label id="ws5-input-label" class="ws5-label" for="ws5-original">Original selected text</label>
+        <textarea id="ws5-original" readonly></textarea>
+        <label class="ws5-label" for="ws5-output">Read-only suggestion — not applied to the document</label>
+        <textarea id="ws5-output" readonly></textarea>
+    </div>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h2 id="auth-title">Login</h2>
+            <div id="auth-error" class="auth-error"></div>
+
+            <div class="auth-field">
+                <label for="username-input">Username</label>
+                <input type="text" id="username-input" placeholder="3-32 characters">
+            </div>
+
+            <div class="auth-field">
+                <label for="password-input">Password</label>
+                <input type="password" id="password-input" placeholder="Min 8 characters">
+            </div>
+
+            <button id="auth-submit-btn" class="auth-btn">Sign In</button>
+            <div id="auth-toggle-btn" class="auth-toggle">Need an account? Register</div>
+        </div>
+    </div>
+
+    <script src="./renderer.js"></script>
+    <script src="./ai-panel.js"></script>
+    <script src="./ai-panel-ui.js"></script>
+</body>
+
+</html>

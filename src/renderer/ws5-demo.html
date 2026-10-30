@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" class="ws5-demo">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'">
+<title>WS-5 standalone UI test — simulated output</title>
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="./ai-panel.css">
+</head>
+<body>
+<div id="status-bar">WS-5 standalone demo — no login, project files, network, or real model</div>
+<div id="editor-view">
+<h2>Demo source — select some text below</h2>
+<p>This is a test fixture, not a project editor. The application login is unchanged.</p>
+<label class="ws5-label" for="ws5-source">Source text</label>
+<textarea id="ws5-source">She go to university every day.
+
+The results shows a 12% improvement for $x=2$, as reported in \cite{smith2024}.</textarea>
+<label class="ws5-label" for="ws5-log">Compile log fixture for Task 8 (simulated, not compiler validation)</label>
+<textarea id="ws5-log" placeholder="Paste a compile-error log to test the Task 8 input route"></textarea>
+<label class="ws5-label"><input type="checkbox" id="ws5-fail"> Simulate model failure</label>
+</div>
+    <div id="ai-panel">
+        <h2>AI Panel</h2>
+        <p><strong>Demo stub — real model integration pending.</strong></p>
+        <label class="ws5-label" for="ws5-task">AI task</label>
+        <select id="ws5-task"></select>
+        <p id="ws5-selection-status">No text selected.</p>
+        <div id="ws5-controls">
+            <button id="ws5-run" type="button" class="primary">Run task</button>
+            <button id="ws5-cancel" type="button" hidden>Cancel</button>
+        </div>
+        <progress id="ws5-progress" aria-label="AI request in progress" hidden></progress>
+        <p id="ws5-status" role="status" aria-live="polite"></p>
+        <label id="ws5-input-label" class="ws5-label" for="ws5-original">Original selected text</label>
+        <textarea id="ws5-original" readonly></textarea>
+        <label class="ws5-label" for="ws5-output">Read-only suggestion — not applied to the document</label>
+        <textarea id="ws5-output" readonly></textarea>
+    </div>
+<script src="./ai-panel.js"></script>
+<script src="./ai-panel-ui.js"></script>
+</body>
+</html>
