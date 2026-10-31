@@ -1,0 +1,2 @@
+# Python runtime; JavaScript/Electron dependencies are in the npm workspace manifests.
+-r services/local-ai/requirements.txt

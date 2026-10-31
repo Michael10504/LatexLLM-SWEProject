@@ -1,0 +1,11 @@
+{
+  "name": "@latexllm/ai-panel",
+  "private": true,
+  "version": "1.0.0",
+  "main": "dist/controller.js",
+  "types": "dist/controller.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test tests/*.test.cjs"
+  }
+}

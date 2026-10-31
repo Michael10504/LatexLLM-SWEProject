@@ -1,0 +1,40 @@
+{
+  "name": "latexllm-workspace",
+  "private": true,
+  "version": "1.0.0",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build -w @latexllm/compile-service && npm run build -w @latexllm/cloud-summary && npm run build -w @latexllm/ai-panel && npm run build -w @latexllm/server && npm run build -w @latexllm/desktop",
+    "start": "npm run build && concurrently -k -n server,desktop \"npm start -w @latexllm/server\" \"npm start -w @latexllm/desktop\"",
+    "start:server": "npm start -w @latexllm/server",
+    "start:desktop": "npm start -w @latexllm/desktop",
+    "start:stub": "cross-env LTX_STUB_AI=1 LTX_STUB_COMPILE=1 CLOUD_SUMMARY_STUB=1 npm start",
+    "test": "npm run test -w @latexllm/compile-service -- --runInBand && npm run test -w @latexllm/cloud-summary && npm run test -w @latexllm/ai-panel && npm run test -w @latexllm/desktop && npm run test -w @latexllm/server",
+    "test:integration": "node --test tests/integration/*.test.cjs",
+    "test:desktop": "node --test tests/desktop/*.test.cjs",
+    "db:generate": "npm exec -w @latexllm/server -- prisma generate",
+    "db:migrate": "node scripts/migrate.mjs",
+    "setup": "python scripts/setup.py",
+    "doctor": "python scripts/doctor.py"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "@types/node": "22.15.30",
+    "jest": "29.7.0",
+    "@types/jest": "29.5.14",
+    "ts-jest": "29.4.5",
+    "jest-environment-jsdom": "29.7.0",
+    "tsx": "4.20.5",
+    "concurrently": "9.1.2",
+    "cross-env": "7.0.3",
+    "esbuild": "0.25.5",
+    "copyfiles": "2.4.1",
+    "playwright-core": "1.51.1"
+  }
+}

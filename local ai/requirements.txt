@@ -1,3 +1,0 @@
---only-binary llama-cpp-python
-# Official Windows x64 Vulkan wheel; no compiler or CUDA toolkit required.
-llama-cpp-python @ https://github.com/abetlen/llama-cpp-python/releases/download/v0.3.36-vulkan/llama_cpp_python-0.3.36-py3-none-win_amd64.whl

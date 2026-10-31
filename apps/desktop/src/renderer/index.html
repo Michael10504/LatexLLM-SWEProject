@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>LaTeX Local LLM Editor</title>
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'none'; worker-src 'self';">
+    <link rel="stylesheet" href="./styles.css">
+    <link rel="stylesheet" href="./ws3.css">
+    <link rel="stylesheet" href="./ai-panel.css">
+    <link rel="stylesheet" href="./assistant.css">
+
+</head>
+
+<body>
+    <div id="status-bar">
+        <span id="user-status">User: Not Logged In</span>
+        <span id="privacy-controls" style="margin-left: auto;">
+            <label><input id="local-only" type="checkbox" checked disabled> Local Only</label>
+            <span id="privacy-status" role="status">Loading privacy settings…</span>
+            <button id="logout-btn"
+                style="display: none; padding: 4px 12px; background: #c53030; color: white; border: none; border-radius: 3px; cursor: pointer;">Logout</button>
+        </span>
+    </div>
+
+    <!-- Workspace Container -->
+    <div class="workspace">
+        <div id="editor-view"></div>
+
+        <!-- Filled by the WS-3 compile panel (ws3.js) -->
+        <div id="pdf-preview"></div>
+
+        <aside id="ai-panel" aria-label="AI assistance">
+            <h2>AI assistance</h2>
+            <p id="ai-mode"></p>
+            <label for="ai-task">Local task</label>
+            <select id="ai-task"></select>
+            <p id="selection-status" aria-live="polite">Select text in the editor.</p>
+            <button id="ai-run" type="button">Run locally</button>
+            <button id="ai-cancel" type="button" hidden>Cancel</button>
+            <progress id="ai-progress" hidden aria-label="Local generation"></progress>
+            <p id="ai-status" role="status" aria-live="polite">Ready.</p>
+            <label for="ai-original">Original selection</label>
+            <textarea id="ai-original" readonly></textarea>
+            <label for="ai-output">Suggestion — document unchanged</label>
+            <textarea id="ai-output" readonly></textarea>
+            <hr>
+            <h3>Paper summary</h3>
+            <p>A separate cloud request, requiring sign-in and consent for every attempt.</p>
+            <details id="cloud-settings">
+                <summary>Account API settings</summary>
+                <p>Saved privately to your signed-in account on this server. Local Only must be off.</p>
+                <label for="cloud-provider">Provider</label>
+                <select id="cloud-provider"><option value="gemini">Google Gemini</option><option value="custom">Custom HTTPS PDF relay</option></select>
+                <label for="cloud-model">Gemini model ID</label>
+                <input id="cloud-model" value="gemini-3.8-flash" autocomplete="off">
+                <label for="cloud-endpoint">Custom HTTPS endpoint (custom relay only)</label>
+                <input id="cloud-endpoint" type="url" placeholder="https://your-relay.example/summarize" autocomplete="off">
+                <p>Custom relay: POST application/pdf with Bearer key; response must be JSON with a summary field.</p>
+                <label for="cloud-key">API key (blank keeps the saved key)</label>
+                <input id="cloud-key" type="password" autocomplete="off" spellcheck="false">
+                <button id="cloud-settings-load" type="button">Load my settings</button>
+                <button id="cloud-settings-save" type="button">Save to my account</button>
+                <button id="cloud-settings-delete" type="button">Remove saved API settings</button>
+                <p id="cloud-settings-status" role="status"></p>
+            </details>
+            <button id="cloud-run" type="button" disabled>Choose PDF and summarize</button>
+            <p id="cloud-status" role="status" aria-live="polite"></p>
+            <label for="cloud-output">Read-only summary</label>
+            <textarea id="cloud-output" readonly></textarea>
+        </aside>
+    </div>
+
+    <!-- Auth Overlay -->
+    <div id="auth-overlay">
+        <div class="auth-card">
+            <h2 id="auth-title">Login</h2>
+            <div id="auth-error" class="auth-error"></div>
+
+            <div class="auth-field">
+                <label for="username-input">Username</label>
+                <input type="text" id="username-input" placeholder="3-32 characters">
+            </div>
+
+            <div class="auth-field">
+                <label for="password-input">Password</label>
+                <input type="password" id="password-input" placeholder="Min 8 characters">
+            </div>
+
+            <button id="auth-submit-btn" class="auth-btn" type="button">Sign In</button>
+            <button id="auth-toggle-btn" class="auth-toggle" type="button">Need an account? Register</button>
+        </div>
+    </div>
+
+    <!-- Project Selection Overlay -->
+    <div id="project-overlay" style="display: none;">
+        <div class="auth-card" style="width: 450px;">
+            <h2>Your Projects</h2>
+
+            <!-- List Container -->
+            <div id="project-list" class="project-list">
+                <!-- Projects will be injected here via TypeScript -->
+            </div>
+
+            <hr style="border-color: #444; margin: 16px 0;">
+
+            <!-- Create New Project -->
+            <div class="auth-field">
+                <label for="new-project-name">Create New Project</label>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="new-project-name" placeholder="Project Name (1-100 chars)" style="flex: 1;">
+                    <button id="create-project-btn" class="auth-btn"
+                        style="width: auto; padding: 8px 16px;">Create</button>
+                </div>
+            </div>
+            <div id="project-error" class="auth-error"></div>
+        </div>
+    </div>
+
+    <script src="./renderer.js"></script>
+    <!-- WS-3 compile panel (bundled by scripts/build-ws3.mjs) -->
+    <script type="module" src="./ws3.js"></script>
+</body>
+
+</html>

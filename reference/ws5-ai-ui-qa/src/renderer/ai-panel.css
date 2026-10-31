@@ -1,0 +1,14 @@
+#ws5-controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+#ws5-task { width: 100%; padding: 8px; background: var(--bg-raised, #262d38); color: inherit; border: 1px solid #596474; border-radius: 4px; }
+.ws5-label { display: block; margin: 14px 0 5px; }
+#ws5-original, #ws5-output, #ws5-log { width: 100%; min-height: 110px; padding: 10px; white-space: pre-wrap; }
+#ws5-output { min-height: 180px; }
+#ws5-source { min-height: 240px; }
+#ws5-progress { width: 100%; margin-top: 10px; }
+#ws5-status, #ws5-selection-status { margin: 10px 0; overflow-wrap: anywhere; }
+#ws5-status[data-state="failed"] { color: #ffb2b2; }
+[hidden] { display: none !important; }
+.ws5-demo body { grid-template-columns: minmax(0, 1fr) minmax(320px, 1fr); }
+.ws5-demo #ai-panel { grid-column: 2; }
+.ws5-demo #status-bar { height: auto; }
+@media (max-width: 900px) { .ws5-demo body { display: block; overflow: auto; height: auto; } }

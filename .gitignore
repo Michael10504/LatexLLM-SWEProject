@@ -28,3 +28,16 @@ package-lock.json.bak
 
 # WS-3 smoke-test output
 packages/compile-service/scripts/out/
+
+# Integrated workspace
+.cache/
+.venv/
+**/node_modules/
+**/dist/
+apps/server/.env
+apps/server/prisma/*.db*
+apps/server/certs/
+.env
+
+# Server credential encryption key (never commit)
+*.credentials.key

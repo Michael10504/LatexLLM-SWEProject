@@ -16,12 +16,6 @@ trailer<</Root 1 0 R>>
 %%EOF
 `;
 
-const SAMPLE_LOG: LogEntry[] = [
-  { level: 'ERROR', file: 'main.tex', line: 5, message: 'Undefined control sequence.' },
-  { level: 'WARNING', file: 'chapters/intro.tex', line: 3, message: "Citation 'knuth' undefined." },
-  { level: 'WARNING', message: 'There were undefined references.' },
-];
-
 /** No-Docker stand-in: returns a sample PDF and log after ~1 s. */
 export class StubCompileService implements CompileService {
   private logs = new Map<string, LogEntry[]>();
@@ -37,8 +31,8 @@ export class StubCompileService implements CompileService {
         this.timers.delete(project.id);
         const pdfPath = path.join(os.tmpdir(), `ltx-stub-${project.id.replace(/[^\w.-]/g, '_')}.pdf`);
         fs.writeFileSync(pdfPath, SAMPLE_PDF);
-        this.logs.set(project.id, SAMPLE_LOG);
-        resolve({ status: 'SUCCESS', pdfPath, log: SAMPLE_LOG, durationMs: Date.now() - started });
+        this.logs.set(project.id, []);
+        resolve({ status: 'SUCCESS', pdfPath, log: [], durationMs: Date.now() - started });
       }, this.delayMs);
       this.timers.set(project.id, { timer, resolve });
     });

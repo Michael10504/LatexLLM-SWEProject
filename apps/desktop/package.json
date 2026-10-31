@@ -1,0 +1,46 @@
+{
+  "name": "@latexllm/desktop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/main/main.js",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "build": "tsc && node scripts/build-renderers.mjs",
+    "start": "electron .",
+    "rebuild:native": "electron-rebuild -f -w better-sqlite3",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Michael10504/LatexLLM-SWEProject.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Michael10504/LatexLLM-SWEProject/issues"
+  },
+  "homepage": "https://github.com/Michael10504/LatexLLM-SWEProject#readme",
+  "devDependencies": {
+    "@types/better-sqlite3": "7.6.13",
+    "electron": "35.7.5",
+    "@electron/rebuild": "3.7.2"
+  },
+  "dependencies": {
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/legacy-modes": "^6.5.5",
+    "@latexllm/compile-service": "file:../../packages/compile-service",
+    "better-sqlite3": "11.10.0",
+    "codemirror": "^6.0.2",
+    "pdfjs-dist": "5.4.624",
+    "@latexllm/cloud-summary": "file:../../packages/cloud-summary",
+    "@latexllm/ai-panel": "file:../../packages/ai-panel"
+  },
+  "allowScripts": {
+    "better-sqlite3@13.0.3": true
+  },
+  "private": true
+}

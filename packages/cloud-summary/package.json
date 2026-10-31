@@ -1,0 +1,14 @@
+{
+  "name": "@latexllm/cloud-summary",
+  "private": true,
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "test": "jest -c jest.config.js --runInBand"
+  },
+  "dependencies": {
+    "pdf-lib": "1.17.1"
+  }
+}

@@ -46,7 +46,7 @@ describe('Step 8 IPC', () => {
     expect(r).not.toHaveProperty('pdfPath');
     const pdf = await api.getPdf('p1');
     expect(Buffer.from(pdf!).subarray(0, 5).toString()).toBe('%PDF-');
-    expect(await api.getLatestLog('p1')).toHaveLength(3);
+    expect(await api.getLatestLog('p1')).toHaveLength(0);
   });
 
   it('uses getLastGoodPdf when the backend has one (DockerCompileService)', async () => {

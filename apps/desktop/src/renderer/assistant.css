@@ -1,0 +1,17 @@
+#status-bar { position: relative; z-index: 1001; min-height: 44px; }
+#privacy-controls { display: flex; align-items: center; gap: 12px; }
+#privacy-status { max-width: 220px; font-size: 11px; }
+#ai-panel { overflow: auto; padding: 16px; min-width: 300px; }
+#ai-panel label, #ai-panel textarea, #ai-panel select { display: block; width: 100%; }
+#ai-panel textarea { min-height: 110px; margin: 8px 0 16px; padding: 8px; resize: vertical;
+    background: var(--bg-editor); color: var(--text); border: 1px solid var(--line); }
+#ai-output, #cloud-output { min-height: 180px; }
+#ai-panel select, #ai-panel button { padding: 7px; margin: 8px 0; }
+#ai-panel p { font-size: 12px; margin: 8px 0; }
+#ai-panel progress { width: 100%; }
+#ai-panel hr { margin: 24px 0; border-color: var(--line); }
+#auth-overlay, #project-overlay { top: 44px; }
+[hidden] { display: none !important; }
+
+#cloud-settings input { width: 100%; padding: 8px; margin: 6px 0; }
+#cloud-settings summary { cursor: pointer; margin: 12px 0; }

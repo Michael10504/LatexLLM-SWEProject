@@ -4,12 +4,12 @@ import { StubCompileService } from '../src/StubCompileService';
 describe('StubCompileService', () => {
   const project = { id: 'demo', rootDir: '/tmp/demo' };
 
-  it('returns a sample PDF and log', async () => {
+  it('returns a sample PDF without inventing source diagnostics', async () => {
     const s = new StubCompileService(10);
     const r = await s.compile(project);
     expect(r.status).toBe('SUCCESS');
     expect(fs.readFileSync(r.pdfPath!).subarray(0, 5).toString()).toBe('%PDF-');
-    expect(s.getLatestLog(project)).toHaveLength(3);
+    expect(s.getLatestLog(project)).toHaveLength(0);
   });
 
   it('a second compile cancels the first', async () => {
