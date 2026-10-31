@@ -56,7 +56,7 @@ export class CloudSummarizerAdapter implements SummarizerAdapter {
     options: CloudSummarizerAdapterOptions
   ) {
     this.providerId = options.providerId ?? 'default-cloud-provider';
-    this.providerName = options.providerName ?? 'Cloud Summarization Service';
+    this.providerName = options.providerName ?? 'Google Gemini';
     this.timeoutMs = options.timeoutMs ?? CloudSummarizerAdapter.TIMEOUT_MS;
     this.endpoint = new URL('/summarize', options.serverBaseUrl).toString();
   }

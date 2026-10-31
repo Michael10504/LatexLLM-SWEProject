@@ -1,0 +1,10 @@
+﻿{
+  "recommendations": [
+    "ms-azuretools.vscode-docker",
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "james-yu.latex-workshop",
+    "orta.vscode-jest",
+    "editorconfig.editorconfig"
+  ]
+}

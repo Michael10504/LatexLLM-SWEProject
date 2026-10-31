@@ -1,0 +1,119 @@
+[
+  {
+    "id": "grammar-connected-paragraphs",
+    "task_id": "grammar",
+    "text": "The study examine how students use the revised laboratory guide. Each participant complete the same exercise, and the research team recieved 24 completed worksheets. The worksheets was checked by one instructor.\n\nThe findings suggests that several instructions need clarification. However, the observations does not establish that the revised guide improves learning, because no comparison group was included.",
+    "review": [
+      "Correct agreement and the spelling of received across both paragraphs with minimal edits.",
+      "Preserve 24 worksheets, the single instructor and the absence of a comparison group.",
+      "Do not rewrite for tone or turn the observations into evidence of improved learning."
+    ],
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "24",
+        "one instructor",
+        "no comparison group"
+      ],
+      "forbid_regex": [
+        "\\bstudy examine\\b",
+        "\\bparticipant complete\\b",
+        "\\brecieved\\b",
+        "\\bworksheets was\\b",
+        "\\bfindings suggests\\b",
+        "\\bobservations does\\b"
+      ]
+    },
+    "reference": "The study examines how students use the revised laboratory guide. Each participant completes the same exercise, and the research team received 24 completed worksheets. The worksheets were checked by one instructor.\n\nThe findings suggest that several instructions need clarification. However, the observations do not establish that the revised guide improves learning, because no comparison group was included."
+  },
+  {
+    "id": "grammar-quantified-limitation",
+    "task_id": "grammar",
+    "text": "Among the 18 households in the trial, water use were about 12% lower than during the previous week. The weather was cooler during the trial, and there was no comparison group. These observations does not show that the device caused the reduction. The finding may justify a larger trial, but it do not guarantee savings in other households.",
+    "review": [
+      "Correct agreement without simplifying or rewriting the argument.",
+      "Preserve the approximation, 18 households, 12% reduction, previous-week baseline and weather confound.",
+      "Keep the absent comparison group, causal caution, conditional larger trial and refusal to guarantee savings."
+    ],
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "18",
+        "12%",
+        "about",
+        "previous week",
+        "cooler",
+        "no comparison group",
+        "may"
+      ],
+      "forbid_regex": [
+        "\\bwater use were\\b",
+        "\\bobservations does\\b",
+        "\\bit do not\\b"
+      ]
+    }
+  },
+  {
+    "id": "grammar-negation",
+    "task_id": "grammar",
+    "text": "The alarm did not sounds during the inspection. The detector was inactive during the first hour, so the absence of an alarm do not prove that no fault existed. Whether a fault was present is still unknown.",
+    "review": [
+      "Correct did not sounds and the agreement error in absence of an alarm do not.",
+      "Preserve detector inactivity, the first-hour timing, and uncertainty about the fault.",
+      "Do not infer a confirmed fault or a confirmed absence of a fault."
+    ],
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "did not",
+        "inactive",
+        "first hour",
+        "unknown"
+      ],
+      "forbid_regex": [
+        "\\bdid not sounds\\b",
+        "\\babsence of an alarm do not\\b"
+      ]
+    },
+    "reference": "The alarm did not sound during the inspection. The detector was inactive during the first hour, so the absence of an alarm does not prove that no fault existed. Whether a fault was present is still unknown."
+  },
+  {
+    "id": "grammar-latex-preservation",
+    "task_id": "grammar",
+    "text": "The equation $E=mc^2$ are used in the analysis described in \\cite{miller2022}. The reasons for choosing it is discussed in \\ref{sec:energy}. A total of 24 samples was examined, but the findings does not establish that the method is accurate in other settings.",
+    "review": [
+      "Correct agreement errors in surrounding prose.",
+      "Preserve the equation, citation and cross-reference exactly and keep the 24-sample count.",
+      "Preserve the limitation on accuracy in other settings; do not add a scientific claim."
+    ],
+    "checks": {
+      "must_change": true,
+      "preserve": [
+        "$E=mc^2$",
+        "\\cite{miller2022}",
+        "\\ref{sec:energy}",
+        "24"
+      ],
+      "forbid_regex": [
+        "\\bare used\\b",
+        "\\breasons for choosing it is\\b",
+        "\\bfindings does\\b"
+      ]
+    }
+  },
+  {
+    "id": "grammar-already-correct",
+    "task_id": "grammar",
+    "text": "The findings suggest a possible association; however, the observational design does not establish causality. Further testing is needed before the method can be recommended.",
+    "review": [
+      "The passage is already grammatical and should remain unchanged.",
+      "Do not replace words merely to improve style or academic tone.",
+      "Do not add commentary, strengthen the finding or invent evidence."
+    ],
+    "checks": {
+      "preserve": [
+        "The findings suggest a possible association; however, the observational design does not establish causality. Further testing is needed before the method can be recommended."
+      ]
+    }
+  }
+]
